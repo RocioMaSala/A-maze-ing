@@ -8,6 +8,12 @@ class UsageError(Exception):
         super().__init__(message)
 
 
+class EntryExitError(Exception):
+    def __init__(self, message: str = "Entry Exit Error: Entry and exit "
+                 "points need to be in different positions") -> None:
+        super().__init__(message)
+
+
 def border_check(x: int, y: int, maze: list[list[int]]) -> bool:
     if y == 0 and (maze[x][y] >> 3) == 0:
         return False
@@ -27,9 +33,14 @@ def maze_verification(maze: list[list[int]]) -> bool:
         for y in range(len(maze[x])):
             if not border_check(x, y, maze):
                 return False
-            while maze[x][y] > 0:
-                if maze[x][y] % 2:
-
+            if y > 0 and y < len(maze[x]) - 1 and (maze[x][y] >> 3) % 2 != (maze[x][y-1] >> 1) % 2:
+                return False
+            elif y > 0 and y < len(maze[x]) - 1 and (maze[x][y] >> 1) % 2 != (maze[x][y+1] >> 1) % 2:
+                return False
+            elif x > 0 and x < len(maze) - 1 and (maze[x][y] >> 2) % 2 != maze[x-1][y] % 2:
+                return False
+            elif x > 0 and x < len(maze) - 1 and maze[x][y] % 2 != (maze[x+1][y] >> 2) % 2:
+                return False
     return True
 
 
@@ -52,7 +63,11 @@ try:
         config = {key.strip(): value.strip() for key, value in
                   (line.split("=", 1) for line in file)}
     maze: list[list[int]] = maze_generation()
+    if config["ENTRY"] == config["EXIT"]:
+        raise EntryExitError
 except UsageError as e:
     print(e)
 except FileNotFoundError:
     print("config.txt file not present")
+except EntryExitError as e:
+    print(e)
