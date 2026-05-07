@@ -1,4 +1,5 @@
 import sys
+import random
 
 
 class UsageError(Exception):
@@ -12,7 +13,16 @@ try:
         raise UsageError
     if sys.argv[1] != "config.txt":
         raise UsageError
-    open("config.txt")
+    with open(sys.argv[1]) as file:
+        config = {key.strip(): value.strip() for key, value in
+                  (line.split("=", 1) for line in file)}
+    maze: list[list[int]] = []
+    for x in range(int(config["HEIGHT"])):
+        maze.append([])
+        for y in range(int(config["WIDTH"])):
+            maze[x].append(random.randint(0, 15))
+    print(maze)
+
 except UsageError as e:
     print(e)
 except FileNotFoundError:
