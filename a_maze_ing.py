@@ -1,6 +1,6 @@
 import sys
 from random import randint
-from maze_generation import full_maze_generation
+from perfect_algorithm import full_maze_generation
 
 
 class UsageError(Exception):
