@@ -1,70 +1,65 @@
-from random import choice
-
-
-def full_maze_generation(height: int, width: int) -> list[list[list[int]]]:
-    maze = [[[1 for _ in range(4)] for y in range(width)]
-            for x in range(height)]
-    return maze
+from random import randint
 
 
 def is_valid(row: int, col: int, vis: list[list[bool]],
              height: int, width: int) -> bool:
-    if (row < 0 or col < 0 or row >= height or col >= width):
-        return False
-    if (vis[row][col]):
-        return False
-    return True
+    if (row >= 0 and col >= 0 and row < height and col < width
+            and vis[row][col] is False):
+        return True
+    return False
 
 
-"""def dfs(maze: list[list[list[int]]], vis: list[list[bool]], height: int,
-        width: int):
-    drow = [0, 1, 0, -1]
-    dcol = [-1, 0, 1, 0]
-    st = []
-    st.append([0, 0])
-
-    row = 0
-    col = 0
-    while len(st) > 0:
-        curr = choice(st)
-        st.remove(curr)
-        row = curr[0]
-        col = curr[1]
-
-        if not is_valid(row, col, vis, height, width):
-            continue
-
-        vis[row][col] = True
-        print(maze[row][col], end=" ")
-
-        for i in range(4):
-            adjx = row + drow[i]
-            adjy = col + dcol[i]
-            st.append([adjx, adjy])"""
+def get_direction(drow: int, dcol: int) -> str:
+    if dcol == 0 and drow == -1:
+        return "north"
+    elif dcol == 1 and drow == 0:
+        return "east"
+    elif dcol == 0 and drow == 1:
+        return "south"
+    else:
+        return "west"
 
 
-def dfs(maze: list[list[list[int]]], vis: list[list[bool]], height: int,
-        width: int, row: int, col: int) -> list[list[list[int]]]:
+def open_wall(maze: list[list[list[int]]], curr: tuple[int, int],
+              row: int, col: int, direction: str):
+    if direction == "north":
+        maze[curr[0]][curr[1]][3] = 0
+        maze[row][col][1] = 0
+    elif direction == "east":
+        maze[curr[0]][curr[1]][2] = 0
+        maze[row][col][0] = 0
+    elif direction == "south":
+        maze[curr[0]][curr[1]][1] = 0
+        maze[row][col][3] = 0
+    else:
+        maze[curr[0]][curr[1]][0] = 0
+        maze[row][col][2] = 0
+
+
+def dfs_rec(maze: list[list[list[int]]], vis: list[list[bool]], height: int,
+            width: int, row: int, col: int) -> None:
     drow = [0, 1, 0, -1]
     dcol = [-1, 0, 1, 0]
     vis[row][col] = True
-    while False in vis:
-
-        if not is_valid(row, col, vis, height, width):
-            continue
-
-        print(maze[row][col], end=" ")
-
-        for i in range(4):
-            adjx = row + drow[i]
-            adjy = col + dcol[i]
-            st.append([adjx, adjy])
-    return maze
+    while drow:
+        change = randint(0, len(drow) - 1)
+        direction = get_direction(drow[change], dcol[change])
+        if is_valid(row + drow[change], col + dcol[change],
+                    vis, height, width):
+            curr = (row, col)
+            row = row + drow[change]
+            col = col + dcol[change]
+            open_wall(maze, curr, row, col, direction)
+            dfs_rec(maze, vis, height, width, row, col)
+        drow.pop(change)
+        dcol.pop(change)
 
 
 def perfect(config: dict[str, str]):
     height = int(config["HEIGHT"])
     width = int(config["WIDTH"])
     vis = [[False for i in range(width)] for j in range(height)]
-    maze = full_maze_generation(height, width)
-    dfs(maze, vis, height, width, 0, 0)
+    maze = [[[1 for _ in range(4)] for y in range(width)]
+            for x in range(height)]
+    dfs_rec(maze, vis, height, width, 0, 0)
+    print(maze)

@@ -1,5 +1,4 @@
 import sys
-from random import randint
 from perfect_algorithm import perfect
 
 
@@ -34,7 +33,7 @@ def main() -> None:
         if config["PERFECT"] == "True":
             perfect(config)
         elif config["PERFECT"] == "False":
-            imperfect(asdkjsahd)
+            print("imperfect")
         else:
             raise ConfigSyntaxError
     except UsageError as e:
