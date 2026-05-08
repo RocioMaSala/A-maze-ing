@@ -17,7 +17,7 @@ def is_valid(row: int, col: int, vis: list[list[bool]],
     return True
 
 
-def dfs(maze: list[list[list[int]]], vis: list[list[bool]], height: int,
+"""def dfs(maze: list[list[list[int]]], vis: list[list[bool]], height: int,
         width: int):
     drow = [0, 1, 0, -1]
     dcol = [-1, 0, 1, 0]
@@ -41,7 +41,26 @@ def dfs(maze: list[list[list[int]]], vis: list[list[bool]], height: int,
         for i in range(4):
             adjx = row + drow[i]
             adjy = col + dcol[i]
+            st.append([adjx, adjy])"""
+
+
+def dfs(maze: list[list[list[int]]], vis: list[list[bool]], height: int,
+        width: int, row: int, col: int) -> list[list[list[int]]]:
+    drow = [0, 1, 0, -1]
+    dcol = [-1, 0, 1, 0]
+    vis[row][col] = True
+    while False in vis:
+
+        if not is_valid(row, col, vis, height, width):
+            continue
+
+        print(maze[row][col], end=" ")
+
+        for i in range(4):
+            adjx = row + drow[i]
+            adjy = col + dcol[i]
             st.append([adjx, adjy])
+    return maze
 
 
 def perfect(config: dict[str, str]):
@@ -49,4 +68,4 @@ def perfect(config: dict[str, str]):
     width = int(config["WIDTH"])
     vis = [[False for i in range(width)] for j in range(height)]
     maze = full_maze_generation(height, width)
-    dfs(maze, vis, height, width)
+    dfs(maze, vis, height, width, 0, 0)
