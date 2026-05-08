@@ -9,4 +9,13 @@ def full_maze_generation(config: dict[str, str]) -> list[list[list[int]]]:
     return maze
 
 
-def dfsRec(maze, visted)
+# def dfsRec(maze, visted):
+
+
+def perfect(config: dict[str, str]):
+    for x in range()
+    
+    
+    visited = [False] * int(config["WIDTH"]) * int(config["HEIGHT"])
+    print(visited)
+    print("perfect")

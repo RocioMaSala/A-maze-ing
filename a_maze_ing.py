@@ -1,6 +1,6 @@
 import sys
 from random import randint
-from perfect_algorithm import full_maze_generation
+from perfect_algorithm import perfect
 
 
 class UsageError(Exception):
@@ -10,15 +10,14 @@ class UsageError(Exception):
 
 
 class EntryExitError(Exception):
-               def __init__(self, message: str = "Entry Exit Error: Entry and exit "
+    def __init__(self, message: str = "Entry Exit Error: Entry and exit "
                  "points need to be in different positions") -> None:
         super().__init__(message)
 
 
-def maze_generation(config: dict[str, str]) -> list[list[int]]:
-    maze = full_maze_generation(config)
-    
-    return 
+class ConfigSyntaxError(Exception):
+    def __init__(self, message: str = "Invalid config file syntax") -> None:
+        super().__init__(message)
 
 
 def main() -> None:
@@ -29,12 +28,16 @@ def main() -> None:
             raise UsageError
         with open(sys.argv[1]) as file:
             config = {key.strip(): value.strip() for key, value in
-
                       (line.split("=", 1) for line in file)}
         if config["ENTRY"] == config["EXIT"]:
             raise EntryExitError
-        maze: list[list[int]] = maze_generation(config)
-        print(maze)
+        if config["PERFECT"] == "True":
+            maze: list[list[int]] = perfect(config)
+            print(maze)
+        elif config["PERFECT"] == "False":
+            print("Not perfect")
+        else:
+            raise ConfigSyntaxError
     except UsageError as e:
         print(e)
     except FileNotFoundError:
