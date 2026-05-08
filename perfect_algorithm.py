@@ -14,6 +14,7 @@ def is_valid(row: int, col: int, vis: list[list[bool]],
     if (vis[row][col]):
         return False
     return True
+    return True
 
 
 def dfs(maze: list[list[list[int]]], vis: list[list[bool]], height: int,
