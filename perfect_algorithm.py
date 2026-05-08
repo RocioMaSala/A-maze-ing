@@ -13,8 +13,8 @@ def is_valid(row: int, col: int, vis: list[list[bool]],
         return False
     if (vis[row][col]):
         return False
+    return True
 
-qweq
 
 def dfs(maze: list[list[list[int]]], vis: list[list[bool]], height: int,
         width: int):
