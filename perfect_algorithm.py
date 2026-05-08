@@ -55,6 +55,22 @@ def dfs_rec(maze: list[list[list[int]]], vis: list[list[bool]], height: int,
         dcol.pop(change)
 
 
+def bin_to_hex(bin: list[int]) -> str:
+    dec = 1 * bin[3] + 2 * bin[2] + 4 * bin[1] + 8 * bin[0]
+    hexa = hex(dec)
+    return hexa
+
+
+def output_file(maze: list[list[list[int]]], config: dict[str, str]) -> None:
+    with open("output_maze.txt", "w+") as f:
+        for x in maze:
+            for y in x:
+                f.write(bin_to_hex(y)[2:].capitalize())
+            f.write("\n")
+        f.write(f"\n{config['ENTRY']}")
+        f.write(f"\n{config['EXIT']}")
+
+
 def perfect(config: dict[str, str]):
     height = int(config["HEIGHT"])
     width = int(config["WIDTH"])
@@ -62,4 +78,4 @@ def perfect(config: dict[str, str]):
     maze = [[[1 for _ in range(4)] for y in range(width)]
             for x in range(height)]
     dfs_rec(maze, vis, height, width, 0, 0)
-    print(maze)
+    output_file(maze, config)
