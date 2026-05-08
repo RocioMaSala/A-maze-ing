@@ -35,7 +35,7 @@ def main() -> None:
             maze: list[list[int]] = perfect(config)
             print(maze)
         elif config["PERFECT"] == "False":
-            print("Not perfect")
+            imperfect(asdkjsahd)
         else:
             raise ConfigSyntaxError
     except UsageError as e:
