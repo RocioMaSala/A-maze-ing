@@ -32,8 +32,7 @@ def main() -> None:
         if config["ENTRY"] == config["EXIT"]:
             raise EntryExitError
         if config["PERFECT"] == "True":
-            maze: list[list[int]] = perfect(config)
-            print(maze)
+            perfect(config)
         elif config["PERFECT"] == "False":
             print("Not perfect")
         else:
