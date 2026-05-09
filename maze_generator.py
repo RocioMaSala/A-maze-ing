@@ -1,5 +1,5 @@
 from random import randint, seed
-
+from queue import Queue
 
 def is_valid(row: int, col: int, vis: list[list[bool]],
              height: int, width: int) -> bool:
@@ -71,7 +71,7 @@ def output_file(maze: list[list[list[int]]], config: dict[str, str]) -> None:
         f.write(f"\n{config['EXIT']}")
 
 
-def perfect(config: dict[str, str]):
+def generator(config: dict[str, str]):
     height = int(config["HEIGHT"])
     width = int(config["WIDTH"])
     vis = [[False for i in range(width)] for j in range(height)]
@@ -79,4 +79,9 @@ def perfect(config: dict[str, str]):
             for x in range(height)]
     seed(int(config["SEED"]))
     dfs_rec(maze, vis, height, width, 0, 0)
+    if config["PERFECT"] == "False":
+
     output_file(maze, config)
+
+
+def find_path(maze: )
