@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, seed
 
 
 def is_valid(row: int, col: int, vis: list[list[bool]],
@@ -77,5 +77,6 @@ def perfect(config: dict[str, str]):
     vis = [[False for i in range(width)] for j in range(height)]
     maze = [[[1 for _ in range(4)] for y in range(width)]
             for x in range(height)]
+    seed(int(config["SEED"]))
     dfs_rec(maze, vis, height, width, 0, 0)
     output_file(maze, config)
