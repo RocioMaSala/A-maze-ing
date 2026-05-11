@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, seed
 from representation import representation
 
 
@@ -47,11 +47,10 @@ def dfs_rec(maze: list[list[list[int]]], vis: list[list[bool]], height: int,
         direction = get_direction(drow[change], dcol[change])
         if is_valid(row + drow[change], col + dcol[change],
                     vis, height, width):
-            curr = (row, col)
-            row = row + drow[change]
-            col = col + dcol[change]
-            open_wall(maze, curr, row, col, direction)
-            dfs_rec(maze, vis, height, width, row, col)
+            new_row = row + drow[change]
+            new_col = col + dcol[change]
+            open_wall(maze, (row, col), new_row, new_col, direction)
+            dfs_rec(maze, vis, height, width, new_row, new_col)
         drow.pop(change)
         dcol.pop(change)
 
@@ -72,12 +71,13 @@ def output_file(maze: list[list[list[int]]], config: dict[str, str]) -> None:
         f.write(f"\n{config['EXIT']}")
 
 
-def perfect(config: dict[str, str]):
+def generator(config: dict[str, str]):
     height = int(config["HEIGHT"])
     width = int(config["WIDTH"])
     vis = [[False for i in range(width)] for j in range(height)]
     maze = [[[1 for _ in range(4)] for y in range(width)]
             for x in range(height)]
+    seed(int(config["SEED"]))
     dfs_rec(maze, vis, height, width, 0, 0)
     output_file(maze, config)
     representation(maze, config)
