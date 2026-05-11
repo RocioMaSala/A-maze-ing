@@ -1,32 +1,54 @@
+COLORS = {
+    "blue": "\033[34m",
+    "red": "\033[31m",
+    "green": "\033[32m",
+    "yellow": "\033[33m",
+    "pink": "\033[38;2;255;105;180m"
+}
+
+def get_color_wall():
+    color = input("Choose a color for Walls (blue, red, green, yellow, pink): ").strip().lower()
+    return COLORS.get(color, COLORS["pink"])
+
+def get_color_corner():
+    color = input("Choose a color for Corners (blue, red, green, yellow, pink): ").strip().lower()
+    return COLORS.get(color, COLORS["blue"])
+
 
 def representation(maze: list[list[list[int]]]) -> None:
-    rows = len(maze)
-    cols = len(maze[0])
+    
+    COLOR_WALL = get_color_wall()
+    COLOR_CORNER = get_color_corner()
+    RESET = "\033[0m"
+    ENTRY=0,0
+    EXIT=3,6
 
-    if rows == 0 or cols == 0:
-        return
-
+    # Dibujar paredes y esquinas / inicio y final
     top_line = ""
-
     for cell in maze[0]:
-        top_line += "+"
-        top_line += "---" if cell[3] else "   "
-    top_line += "+"
+        top_line += f"{COLOR_CORNER}+{RESET}"
+        top_line += f"{COLOR_WALL}---{RESET}" if cell[3] else "  "
+    top_line += f"{COLOR_CORNER}+{RESET}"
     print(top_line)
 
-    for row in maze:
+    for i, row in enumerate(maze): # con "enumerate" puedes recorrer lista por índice y por contenido
         middle_line = ""
-        for cell in row:
-            middle_line += "|" if cell[0] else " "
-            middle_line += "   "
-        middle_line += "|"
+        for j, cell in enumerate(row):
+            middle_line += f"{COLOR_WALL}|{RESET}" if cell[0] else " "
+            if (i, j) == ENTRY:
+                middle_line += "🟢 "
+            elif (i, j) == EXIT:
+                middle_line += "🚪 "
+            else:
+                middle_line += "   "
+        middle_line += f"{COLOR_WALL}|{RESET}"
         print(middle_line)
     
         bottom_line = ""
         for cell in row:
-            bottom_line += "+"
-            bottom_line += "---" if cell[1] else "   "
-        bottom_line += "+"
+            bottom_line += f"{COLOR_CORNER}+{RESET}"
+            bottom_line += f"{COLOR_WALL}---{RESET}" if cell[1] else "   "
+        bottom_line += f"{COLOR_CORNER}+{RESET}"
         print(bottom_line)
 
 
