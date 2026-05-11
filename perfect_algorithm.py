@@ -1,4 +1,5 @@
 from random import randint
+from representation import representation
 
 
 def is_valid(row: int, col: int, vis: list[list[bool]],
@@ -79,3 +80,4 @@ def perfect(config: dict[str, str]):
             for x in range(height)]
     dfs_rec(maze, vis, height, width, 0, 0)
     output_file(maze, config)
+    representation(maze, config)
