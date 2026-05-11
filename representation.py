@@ -1,30 +1,37 @@
 
-bin_list = []
-
 def representation(maze: list[list[list[int]]]) -> None:
+    rows = len(maze)
+    cols = len(maze[0])
+
+    if rows == 0 or cols == 0:
+        return
+
+    top_line = ""
+
+    for cell in maze[0]:
+        top_line += "+"
+        top_line += "---" if cell[3] else "   "
+    top_line += "+"
+    print(top_line)
+
     for row in maze:
-        line = ""
-        for block in row:
-            if block[3] == 1:
-                line += "=="
-            else:
-                line += " "
-            if block[2] == 1:
-                line += "=="
-            else:
-                line += "||"
-            if block[1] == 1:
-                line += "=="
-            else:
-                line += " "    
-            if block[0] == 1:
-                line += "||" 
-            else:
-                line += " "
-        print(line)
+        middle_line = ""
+        for cell in row:
+            middle_line += "|" if cell[0] else " "
+            middle_line += "   "
+        middle_line += "|"
+        print(middle_line)
+    
+        bottom_line = ""
+        for cell in row:
+            bottom_line += "+"
+            bottom_line += "---" if cell[1] else "   "
+        bottom_line += "+"
+        print(bottom_line)
 
 
 def hexatodectobin(maze: list[list[list[int]]]) -> None:
+    bin_list = []
     for row in maze:
         bin_row = []
         for number in row:
