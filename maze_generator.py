@@ -1,6 +1,7 @@
 from random import randint, seed
 from queue import Queue
 
+
 def is_valid(row: int, col: int, vis: list[list[bool]],
              height: int, width: int) -> bool:
     if (row >= 0 and col >= 0 and row < height and col < width
@@ -46,11 +47,10 @@ def dfs_rec(maze: list[list[list[int]]], vis: list[list[bool]], height: int,
         direction = get_direction(drow[change], dcol[change])
         if is_valid(row + drow[change], col + dcol[change],
                     vis, height, width):
-            curr = (row, col)
-            row = row + drow[change]
-            col = col + dcol[change]
-            open_wall(maze, curr, row, col, direction)
-            dfs_rec(maze, vis, height, width, row, col)
+            new_row = row + drow[change]
+            new_col = col + dcol[change]
+            open_wall(maze, (row, col), new_row, new_col, direction)
+            dfs_rec(maze, vis, height, width, new_row, new_col)
         drow.pop(change)
         dcol.pop(change)
 
@@ -79,9 +79,4 @@ def generator(config: dict[str, str]):
             for x in range(height)]
     seed(int(config["SEED"]))
     dfs_rec(maze, vis, height, width, 0, 0)
-    if config["PERFECT"] == "False":
-
     output_file(maze, config)
-
-
-def find_path(maze: )
