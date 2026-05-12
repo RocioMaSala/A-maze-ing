@@ -1,4 +1,4 @@
-from random import randint, seed
+from random import randint, seed, choice
 from representation import representation
 from queue import Queue
 
@@ -16,6 +16,8 @@ class MazeGenerator:
         self.output_file(maze, config)
         vis = [[False for i in range(width)] for j in range(height)]
         self.bfs(maze, config, vis)
+        if config["PERFECT"] == False:
+            self.imperfect_maze(maze)
         representation(maze, config)
 
     def is_valid_dfs(self, row: int, col: int, vis: list[list[bool]],
@@ -160,3 +162,7 @@ class MazeGenerator:
                                      width, direction, maze):
                     vis[next_cell[0]][next_cell[1]] = True
                     queue.put((next_cell, path + [direction]))
+    
+    def imperfect_maze(self, maze: list[list[list[int]]]) -> None:
+        y = randint(maze)
+        x = choice()
