@@ -1,3 +1,4 @@
+
 COLORS = {
     "blue": "\033[34m",
     "red": "\033[31m",
@@ -21,8 +22,11 @@ def get_color_corner():
 
 def representation(maze: list[list[list[int]]], config: dict[str, str]) -> None:
 
+    from maze_generator import draw_42 # chapuza, cambiar
+    
     COLOR_WALL = get_color_wall()
     COLOR_CORNER = get_color_corner()
+    COLOR_42 = "\033[43m"
     RESET = "\033[0m"
     ENTRY_STR = config["ENTRY"].split(",")
     EXIT_STR = config["EXIT"].split(",")
@@ -52,7 +56,10 @@ def representation(maze: list[list[list[int]]], config: dict[str, str]) -> None:
             elif [j, i] == EXIT:
                 middle_line += "🚪 "
             else:
-                middle_line += "   "
+                if cell[0] and cell[1] and cell[2] and cell[3]:
+                    middle_line += f"{COLOR_42}   {RESET}"                
+                else:
+                    middle_line += "   "
         middle_line += f"{COLOR_WALL}|{RESET}"
         print(middle_line)
 
@@ -62,3 +69,5 @@ def representation(maze: list[list[list[int]]], config: dict[str, str]) -> None:
             bottom_line += f"{COLOR_WALL}---{RESET}" if cell[1] else "   "
         bottom_line += f"{COLOR_CORNER}+{RESET}"
         print(bottom_line)
+
+
