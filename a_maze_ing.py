@@ -10,12 +10,24 @@ class UsageError(Exception):
 
 class EntryExitError(Exception):
     def __init__(self, message: str = "Entry Exit Error: Entry and exit "
-                 "points need to be in different positions") -> None:
+                 "points need to be in different positions.") -> None:
         super().__init__(message)
 
 
 class ConfigSyntaxError(Exception):
-    def __init__(self, message: str = "Invalid config file syntax") -> None:
+    def __init__(self, message: str = "Invalid config file syntax.") -> None:
+        super().__init__(message)
+
+
+class EntryError(Exception):
+    def __init__(self, message: str = "Entry coordinates must be within maze"
+                 " boundaries.") -> None:
+        super().__init__(message)
+
+
+class ExitError(Exception):
+    def __init__(self, message: str = "Exit coordinates must be within maze"
+                 " boundaries.") -> None:
         super().__init__(message)
 
 
@@ -43,12 +55,24 @@ def main() -> None:
                        line.strip())}
         if config["ENTRY"] == config["EXIT"]:
             raise EntryExitError
+        ENTRY = [int(x) for x in config["ENTRY"].split(",")]
+        EXIT = [int(x) for x in config["EXIT"].split(",")]
+        if ENTRY[0] > int(config["WIDTH"]) or ENTRY[0] < 0 or ENTRY[1] > int(
+                config["HEIGHT"]) or ENTRY[1] < 0:
+            raise EntryError
+        if EXIT[0] > int(config["WIDTH"]) or EXIT[0] < 0 or EXIT[1] > int(
+                config["HEIGHT"]) or EXIT[1] < 0:
+            raise ExitError
         generator(config)
     except UsageError as e:
         print(e)
     except FileNotFoundError:
         print("config.txt file not present")
     except EntryExitError as e:
+        print(e)
+    except EntryError as e:
+        print(e)
+    except ExitError as e:
         print(e)
 
 

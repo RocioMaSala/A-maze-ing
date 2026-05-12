@@ -1,5 +1,6 @@
 from random import randint, seed
 from representation import representation
+from path_finder import bfs
 
 
 def is_valid(row: int, col: int, vis: list[list[bool]],
@@ -22,7 +23,7 @@ def get_direction(drow: int, dcol: int) -> str:
 
 
 def open_wall(maze: list[list[list[int]]], curr: tuple[int, int],
-              row: int, col: int, direction: str):
+              row: int, col: int, direction: str) -> None:
     if direction == "north":
         maze[curr[0]][curr[1]][3] = 0
         maze[row][col][1] = 0
@@ -80,4 +81,6 @@ def generator(config: dict[str, str]):
     seed(int(config["SEED"]))
     dfs_rec(maze, vis, height, width, 0, 0)
     output_file(maze, config)
+    vis = [[False for i in range(width)] for j in range(height)]
+    bfs(maze, config, vis)
     representation(maze, config)
