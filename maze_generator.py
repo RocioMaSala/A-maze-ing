@@ -1,6 +1,5 @@
 from random import randint, seed
 from representation import representation
-from path_finder import bfs
 from queue import Queue
 
 
@@ -16,7 +15,7 @@ class MazeGenerator:
         self.dfs_rec(maze, vis, height, width, 0, 0)
         self.output_file(maze, config)
         vis = [[False for i in range(width)] for j in range(height)]
-        bfs(maze, config, vis)
+        self.bfs(maze, config, vis)
         representation(maze, config)
 
     def is_valid_dfs(self, row: int, col: int, vis: list[list[bool]],
