@@ -1,6 +1,7 @@
 from random import randint, seed
 from representation import representation
 from path_finder import bfs
+from queue import Queue
 
 
 class MazeGenerator:
@@ -18,8 +19,8 @@ class MazeGenerator:
         bfs(maze, config, vis)
         representation(maze, config)
 
-    def is_valid(self, row: int, col: int, vis: list[list[bool]],
-                 height: int, width: int) -> bool:
+    def is_valid_dfs(self, row: int, col: int, vis: list[list[bool]],
+                     height: int, width: int) -> bool:
         if (row >= 0 and col >= 0 and row < height and col < width
                 and vis[row][col] is False):
             return True
@@ -27,23 +28,23 @@ class MazeGenerator:
 
     def get_direction(self, drow: int, dcol: int) -> str:
         if dcol == 0 and drow == -1:
-            return "north"
+            return "N"
         elif dcol == 1 and drow == 0:
-            return "east"
+            return "E"
         elif dcol == 0 and drow == 1:
-            return "south"
+            return "S"
         else:
-            return "west"
+            return "W"
 
     def open_wall(self, maze: list[list[list[int]]], curr: tuple[int, int],
                   row: int, col: int, direction: str) -> None:
-        if direction == "north":
+        if direction == "N":
             maze[curr[0]][curr[1]][3] = 0
             maze[row][col][1] = 0
-        elif direction == "east":
+        elif direction == "E":
             maze[curr[0]][curr[1]][2] = 0
             maze[row][col][0] = 0
-        elif direction == "south":
+        elif direction == "S":
             maze[curr[0]][curr[1]][1] = 0
             maze[row][col][3] = 0
         else:
@@ -58,8 +59,8 @@ class MazeGenerator:
         while drow:
             change = randint(0, len(drow) - 1)
             direction = self.get_direction(drow[change], dcol[change])
-            if self.is_valid(row + drow[change], col + dcol[change],
-                             vis, height, width):
+            if self.is_valid_dfs(row + drow[change], col + dcol[change],
+                                 vis, height, width):
                 new_row = row + drow[change]
                 new_col = col + dcol[change]
                 self.open_wall(maze, (row, col), new_row, new_col, direction)
@@ -103,3 +104,60 @@ class MazeGenerator:
         vis[y+4][x+4] = True
         vis[y+4][x+5] = True
         vis[y+4][x+6] = True
+
+    def valid_direction(self, maze: list[list[list[int]]],
+                        curr: tuple[int, ...], next: tuple[int, int],
+                        direction: str) -> bool:
+        if direction == "N" and maze[curr[0]][curr[1]][3] == 0 and maze[
+                next[0]][next[1]][1] == 0:
+            return True
+        elif direction == "E" and maze[curr[0]][curr[1]][2] == 0 and maze[
+                next[0]][next[1]][0] == 0:
+            return True
+        elif direction == "S" and maze[curr[0]][curr[1]][1] == 0 and maze[
+                next[0]][next[1]][3] == 0:
+            return True
+        elif direction == "W" and maze[curr[0]][curr[1]][0] == 0 and maze[
+                next[0]][next[1]][2] == 0:
+            return True
+        return False
+
+    def is_valid_bfs(self, next: tuple[int, int], curr: tuple[int, ...],
+                     vis: list[list[bool]], height: int, width: int,
+                     direction: str, maze: list[list[list[int]]]) -> bool:
+        if (next[0] >= 0 and next[1] >= 0 and next[0] < height and
+            next[1] < width and vis[next[0]][next[1]] is False and
+                self.valid_direction(maze, curr, next, direction)):
+            return True
+        return False
+
+    def bfs(self, maze: list[list[list[int]]], config: dict[str, str],
+            vis: list[list[bool]]) -> None:
+        directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+        entry_rev = tuple(int(x) for x in config["ENTRY"].split(","))
+        exit_rev = tuple(int(x) for x in config["EXIT"].split(","))
+        entry = entry_rev[::-1]
+        exit = exit_rev[::-1]
+        height = int(config["HEIGHT"])
+        width = int(config["WIDTH"])
+        vis[entry[0]][entry[1]] = True
+        queue: Queue[tuple[tuple[int, ...], list[str]]] = Queue()
+        queue.put((entry, []))
+        while not queue.empty():
+            (cell, path) = queue.get()
+            for dx, dy in directions:
+                direction = self.get_direction(dx, dy)
+                next_cell = (cell[0]+dx, cell[1]+dy)
+                if (next_cell == exit and
+                        self.valid_direction(maze, cell, next_cell,
+                                             direction)):
+                    path = path + [direction]
+                    with open("output_maze.txt", "a") as f:
+                        route = "".join(path)
+                        f.write("\n")
+                        f.write(route)
+                        return
+                if self.is_valid_bfs(next_cell, cell, vis, height,
+                                     width, direction, maze):
+                    vis[next_cell[0]][next_cell[1]] = True
+                    queue.put((next_cell, path + [direction]))
