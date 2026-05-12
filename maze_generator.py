@@ -1,5 +1,6 @@
 from random import randint, seed
 from representation import representation
+from path_finder import bfs
 
 
 def is_valid(row: int, col: int, vis: list[list[bool]],
@@ -22,7 +23,7 @@ def get_direction(drow: int, dcol: int) -> str:
 
 
 def open_wall(maze: list[list[list[int]]], curr: tuple[int, int],
-              row: int, col: int, direction: str):
+              row: int, col: int, direction: str) -> None:
     if direction == "north":
         maze[curr[0]][curr[1]][3] = 0
         maze[row][col][1] = 0
@@ -71,6 +72,29 @@ def output_file(maze: list[list[list[int]]], config: dict[str, str]) -> None:
         f.write(f"\n{config['EXIT']}")
 
 
+def draw_42(vis: list[list[bool]]) -> None:
+    y = round((len(vis) - 5) / 2)
+    x = round((len(vis[0]) - 7) / 2)
+    vis[y][x] = True
+    vis[y+1][x] = True
+    vis[y+2][x] = True
+    vis[y+2][x+1] = True
+    vis[y+2][x+2] = True
+    vis[y+3][x+2] = True
+    vis[y+4][x+2] = True
+    vis[y][x+4] = True
+    vis[y][x+5] = True
+    vis[y][x+6] = True
+    vis[y+1][x+6] = True
+    vis[y+2][x+6] = True
+    vis[y+2][x+5] = True
+    vis[y+2][x+4] = True
+    vis[y+3][x+4] = True
+    vis[y+4][x+4] = True
+    vis[y+4][x+5] = True
+    vis[y+4][x+6] = True
+
+
 def generator(config: dict[str, str]):
     height = int(config["HEIGHT"])
     width = int(config["WIDTH"])
@@ -78,6 +102,9 @@ def generator(config: dict[str, str]):
     maze = [[[1 for _ in range(4)] for y in range(width)]
             for x in range(height)]
     seed(int(config["SEED"]))
+    draw_42(vis)
     dfs_rec(maze, vis, height, width, 0, 0)
     output_file(maze, config)
+    vis = [[False for i in range(width)] for j in range(height)]
+    bfs(maze, config, vis)
     representation(maze, config)
