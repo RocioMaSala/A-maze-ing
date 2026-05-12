@@ -29,16 +29,18 @@ def valid_direction(maze: list[list[list[int]]], curr: tuple[int, int],
     return False
 
 
-def is_valid(next: tuple[int, int], curr: tuple[int, int], vis: list[list[bool]],
-             height: int, width: int, direction: str, maze:
-             list[list[list[int]]]) -> bool:
+def is_valid(next: tuple[int, int], curr: tuple[int, int],
+             vis: list[list[bool]], height: int, width: int, direction: str,
+             maze: list[list[list[int]]]) -> bool:
     if (next[0] >= 0 and next[1] >= 0 and next[0] < height and next[1] < width
-            and vis[next[0]][next[1]] is False and valid_direction(maze, curr, next, direction)):
+            and vis[next[0]][next[1]] is False and
+            valid_direction(maze, curr, next, direction)):
         return True
     return False
 
 
-def bfs(maze: list[list[list[int]]], config: dict[str, str], vis: list[list[bool]]) -> None:
+def bfs(maze: list[list[list[int]]], config: dict[str, str],
+        vis: list[list[bool]]) -> None:
     directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
     entry_rev = tuple(int(x) for x in config["ENTRY"].split(","))
     exit_rev = tuple(int(x) for x in config["EXIT"].split(","))
@@ -54,7 +56,8 @@ def bfs(maze: list[list[list[int]]], config: dict[str, str], vis: list[list[bool
         for dx, dy in directions:
             direction = get_direction(dx, dy)
             next_cell = (cell[0]+dx, cell[1]+dy)
-            if next_cell == exit and valid_direction(maze, cell, next_cell, direction):
+            if next_cell == exit and valid_direction(maze, cell, next_cell,
+                                                     direction):
                 path = path + [direction]
                 with open("output_maze.txt", "a") as f:
                     route = "".join(path)
