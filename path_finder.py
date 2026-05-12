@@ -12,6 +12,20 @@ def get_direction(drow: int, dcol: int) -> str:
         return "W"
 
 
+def direction(x: str) -> tuple[int, int]:
+    if x == "N":
+        return (-1, 0)
+
+
+def show_path:
+    row = ENTRY[0]
+col = ENTRY[1]
+    for x in path:
+    direction(x)
+    row = row + x[0]
+    col = col + x[1]
+    maze[row][col] = Square
+
 def valid_direction(maze: list[list[list[int]]], curr: tuple[int, int],
                     next: tuple[int, int], direction: str) -> bool:
     if direction == "N" and maze[curr[0]][curr[1]][3] == 0 and maze[
