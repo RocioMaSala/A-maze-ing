@@ -1,5 +1,5 @@
 import sys
-from maze_generator import generator
+from maze_generator import MazeGenerator
 
 
 class UsageError(Exception):
@@ -63,7 +63,7 @@ def main() -> None:
         if EXIT[0] > int(config["WIDTH"]) or EXIT[0] < 0 or EXIT[1] > int(
                 config["HEIGHT"]) or EXIT[1] < 0:
             raise ExitError
-        generator(config)
+        MazeGenerator(config)
     except UsageError as e:
         print(e)
     except FileNotFoundError:
