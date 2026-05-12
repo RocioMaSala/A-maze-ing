@@ -1,5 +1,5 @@
 from random import randint, seed
-from representation import representation
+from representation import representation, representation_path
 from queue import Queue
 
 
@@ -155,6 +155,7 @@ class MazeGenerator:
                         route = "".join(path)
                         f.write("\n")
                         f.write(route)
+                        representation_path(route)
                         return
                 if self.is_valid_bfs(next_cell, cell, vis, height,
                                      width, direction, maze):
