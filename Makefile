@@ -6,7 +6,7 @@
 #    By: romarti2 <romarti2@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/02 17:55:29 by romarti2          #+#    #+#              #
-#    Updated: 2026/05/12 13:30:29 by romarti2         ###   ########.fr        #
+#    Updated: 2026/05/12 13:38:54 by romarti2         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -58,7 +58,7 @@ lint:
 
 lint-strict:
 	@echo "Running strict lint checks..."
-	flake8 .
-	mypy . --strict
+	-$(PYTHON) -m flake8 .
+	$(PYTHON) -m mypy . --strict
 
 .PHONY: all install run debug clean fclean re lint lint-strict
