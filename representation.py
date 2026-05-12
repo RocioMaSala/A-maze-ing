@@ -7,7 +7,6 @@ COLORS = {
     "pink": "\033[38;2;255;105;180m"
 }
 
-
 def get_color_wall():
     color = input(
         "Choose a color for Walls (blue, red, green, yellow, pink): ").strip().lower()
@@ -21,8 +20,6 @@ def get_color_corner():
 
 
 def representation(maze: list[list[list[int]]], config: dict[str, str]) -> None:
-
-    from maze_generator import draw_42 # chapuza, cambiar
     
     COLOR_WALL = get_color_wall()
     COLOR_CORNER = get_color_corner()
@@ -69,5 +66,24 @@ def representation(maze: list[list[list[int]]], config: dict[str, str]) -> None:
             bottom_line += f"{COLOR_WALL}---{RESET}" if cell[1] else "   "
         bottom_line += f"{COLOR_CORNER}+{RESET}"
         print(bottom_line)
+
+def representation_path(route: str) -> list[tuple[int, int]]:
+    directions = []
+    for x in route:
+        if x == "N":
+            directions.append((0, -1))
+        elif x == "S":
+            directions.append((0, 1))
+        elif x == "E":
+            directions.append((1, 0))
+        elif x == "W":
+            directions.append((-1, 0))
+    print(directions) # Ahora tengo que ver dónde empezar y a partir de ahí, aplicar las direcciones de coordenadas
+        
+if __name__ == "__main__":
+    representation_path("NSEWSSSE")
+
+
+
 
 
