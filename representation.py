@@ -21,8 +21,7 @@ def get_color_corner():
 
 
 def representation(maze: list[list[list[int]]], config: dict[str, str]) -> None:
-
-    from maze_generator import draw_42 # chapuza, cambiar
+ # chapuza, cambiar
     
     COLOR_WALL = get_color_wall()
     COLOR_CORNER = get_color_corner()
