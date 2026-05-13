@@ -64,7 +64,7 @@ def representation(maze: list[list[list[int]]], config: dict[str, str], route: s
     top_line = ""
     for cell in maze[0]:
         top_line += f"{COLOR_CORNER}+{RESET}"
-        top_line += f"\033[1m{COLOR_WALL}---{RESET}" if cell[3] else "  "
+        top_line += f"\033[1m{COLOR_WALL}───{RESET}"
     top_line += f"{COLOR_CORNER}+{RESET}"
     print(top_line)
 
@@ -73,19 +73,19 @@ def representation(maze: list[list[list[int]]], config: dict[str, str], route: s
         middle_line = ""
         for j, cell in enumerate(row):
             is_solid = all(cell)
-            middle_line += f"\033[1m{COLOR_WALL}|{RESET}" if cell[0] else " "
+            middle_line += f"\033[1m{COLOR_WALL}│{RESET}" if cell[0] else " "
             if [j, i] == ENTRY:
                 middle_line += f"{COLOR_ENTRY} S {RESET}"
             elif [j, i] == EXIT:
                 middle_line += f"{COLOR_EXIT} F {RESET}"
             elif [j, i] in path_coords:
-                    middle_line += f"{COLOR_PATH} + {RESET}"
+                    middle_line += f"-+-"
             else:
                 if is_solid:
                     middle_line += f"{COLOR_42}   {RESET}"    
                 else:
                     middle_line += "   "
-        middle_line += f"\033[1m{COLOR_WALL}|{RESET}"
+        middle_line += f"\033[1m{COLOR_WALL}│{RESET}"
         print(middle_line)
 
         bottom_line = ""
@@ -94,7 +94,7 @@ def representation(maze: list[list[list[int]]], config: dict[str, str], route: s
             if is_solid:
                 bottom_line += f"{COLOR_42}   {RESET}"
             else:
-                bottom_line += f"\033[1m{COLOR_WALL}---{RESET}" if cell[1] else "   "
+                bottom_line += f"\033[1m{COLOR_WALL}───{RESET}" if cell[1] else "   "
         bottom_line += f"{COLOR_CORNER}+{RESET}"
         print(bottom_line)
 
