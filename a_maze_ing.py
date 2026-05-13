@@ -53,6 +53,29 @@ def random_generator(config: dict[str, str]) -> Generator[None, None, None]:
         seed_val += 1
         yield
 
+def menu():
+    print("== A-Maze-ing ===")
+    print("1. Re-generate a new maze")
+    print("2. Show/Hide path from entry to exit")
+    print("3. Rotate maze colors")
+    print("4. Quit")
+
+    option = input("Choice? (1-4): ")
+
+    while option not in ("1", "2", "3", "4"):
+        option = input("Invalid choice. Try again (1-4): ")
+    if option == "1":
+        main()
+    elif option == "2":
+        if show: # hacer un interruptor
+            print ("Hide!")
+        else:
+            print("Show!")
+    elif option == "3":
+        print("Let's rotate the colors")
+    elif option == "4":
+        print("Thank you! Bye Bye")
+        return
 
 def main() -> None:
     try:
