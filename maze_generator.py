@@ -1,5 +1,5 @@
-from random import randint, seed
-from representation import representation, representation_path
+from random import randint, seed, choice
+from representation import representation
 from queue import Queue
 
 
@@ -15,8 +15,10 @@ class MazeGenerator:
         self.dfs_rec(maze, vis, height, width, 0, 0)
         self.output_file(maze, config)
         vis = [[False for i in range(width)] for j in range(height)]
-        self.bfs(maze, config, vis)
-        representation(maze, config)
+        if config["PERFECT"] == "True":
+            self.bfs(maze, config, vis)
+        elif config["PERFECT"] == "False":
+            self.imperfect_maze(maze, config, vis)
 
     def is_valid_dfs(self, row: int, col: int, vis: list[list[bool]],
                      height: int, width: int) -> bool:
@@ -131,7 +133,7 @@ class MazeGenerator:
         return False
 
     def bfs(self, maze: list[list[list[int]]], config: dict[str, str],
-            vis: list[list[bool]]) -> None:
+            vis: list[list[bool]], mode: str = "shortest") -> bool:
         directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
         entry_rev = tuple(int(x) for x in config["ENTRY"].split(","))
         exit_rev = tuple(int(x) for x in config["EXIT"].split(","))
@@ -140,24 +142,84 @@ class MazeGenerator:
         height = int(config["HEIGHT"])
         width = int(config["WIDTH"])
         vis[entry[0]][entry[1]] = True
+        solutions = []
+        shortest_length = None
         queue: Queue[tuple[tuple[int, ...], list[str]]] = Queue()
         queue.put((entry, []))
         while not queue.empty():
             (cell, path) = queue.get()
+            if mode == "shortest":
+                if (shortest_length is not None and
+                        len(path) >= shortest_length):
+                    continue
             for dx, dy in directions:
                 direction = self.get_direction(dx, dy)
                 next_cell = (cell[0]+dx, cell[1]+dy)
                 if (next_cell == exit and
                         self.valid_direction(maze, cell, next_cell,
                                              direction)):
-                    path = path + [direction]
-                    with open("output_maze.txt", "a") as f:
-                        route = "".join(path)
-                        f.write("\n")
-                        f.write(route)
-                        representation_path(route)
-                        return
+                    candidate = path + [direction]
+                    if shortest_length is None:
+                        shortest_length = len(candidate)
+                    solutions.append(candidate)
+                    if mode == "shortest":
+                        with open("output_maze.txt", "a") as f:
+                            route = "".join(candidate)
+                            f.write("\n")
+                            f.write(route)
+                            representation(maze, config, route)
+                            return True
+                    elif len(solutions) > 1:
+                        return True
                 if self.is_valid_bfs(next_cell, cell, vis, height,
                                      width, direction, maze):
                     vis[next_cell[0]][next_cell[1]] = True
                     queue.put((next_cell, path + [direction]))
+        if mode == "unique":
+            return False
+        return False
+
+    def is_wall(self, curr_cell: list[int], next_cell: list[int],
+                direction: tuple[int, int]) -> bool:
+        dir_str = self.get_direction(direction[1], direction[0])
+        if dir_str == "N":
+            if curr_cell[3] == 1 and next_cell[1] == 1:
+                return True
+        elif dir_str == "E":
+            if curr_cell[2] == 1 and next_cell[0] == 1:
+                return True
+        elif dir_str == "S":
+            if curr_cell[1] == 1 and next_cell[3] == 1:
+                return True
+        else:
+            if curr_cell[0] == 1 and next_cell[2] == 1:
+                return True
+        return False
+
+    def remove_wall(self, maze: list[list[list[int]]], x: int, y: int,
+                    dir: tuple[int, int]) -> None:
+        dir_str = self.get_direction(dir[1], dir[0])
+        if dir_str == "N":
+            maze[y][x][3] = 0
+            maze[y+dir[0]][x+dir[1]][1] = 0
+        elif dir_str == "E":
+            maze[y][x][2] = 0
+            maze[y+dir[0]][x+dir[1]][0] = 0
+        elif dir_str == "S":
+            maze[y][x][1] = 0
+            maze[y+dir[0]][x+dir[1]][3] = 0
+        else:
+            maze[y][x][0] = 0
+            maze[y+dir[0]][x+dir[1]][2] = 0
+
+    def imperfect_maze(self, maze: list[list[list[int]]],
+                       config: dict[str, str], vis: list[list[bool]]) -> None:
+        directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+        while not self.bfs(maze, config, vis, "unique"):
+            dir = choice(directions)
+            y = randint(0, len(maze) - 1)
+            x = randint(0, len(maze[0]) - 1)
+            if self.is_wall(maze[y][x], maze[y+dir[0]][x+dir[1]], dir):
+                self.remove_wall(maze, x, y, dir)
+        vis = vis
+        self.bfs(maze, config, vis)
