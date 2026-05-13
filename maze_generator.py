@@ -15,11 +15,10 @@ class MazeGenerator:
         self.dfs_rec(maze, vis, height, width, 0, 0)
         self.output_file(maze, config)
         vis = [[False for i in range(width)] for j in range(height)]
-        self.bfs(maze, config, vis)
-        vis = [[False for i in range(width)] for j in range(height)]
-        if config["PERFECT"] == "False":
+        if config["PERFECT"] == "True":
+            self.bfs(maze, config, vis)
+        elif config["PERFECT"] == "False":
             self.imperfect_maze(maze, config, vis)
-        representation(maze, config)
 
     def is_valid_dfs(self, row: int, col: int, vis: list[list[bool]],
                      height: int, width: int) -> bool:
@@ -168,6 +167,7 @@ class MazeGenerator:
                             route = "".join(candidate)
                             f.write("\n")
                             f.write(route)
+                            representation(maze, config, route)
                             return True
                     elif len(solutions) > 1:
                         return True
@@ -221,3 +221,5 @@ class MazeGenerator:
             x = randint(0, len(maze[0]) - 1)
             if self.is_wall(maze[y][x], maze[y+dir[0]][x+dir[1]], dir):
                 self.remove_wall(maze, x, y, dir)
+        vis = vis
+        self.bfs(maze, config, vis)

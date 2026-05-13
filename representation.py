@@ -32,7 +32,7 @@ def coordinates_path(route: str) -> list[tuple[int, int]]:
             directions.append((-1, 0))
     return (directions)
 
-def representation(maze: list[list[list[int]]], config: dict[str, str]) -> None:
+def representation(maze: list[list[list[int]]], config: dict[str, str], route: str) -> None:
     
     COLOR_WALL = get_color_wall()
     COLOR_CORNER = get_color_corner()
@@ -53,7 +53,7 @@ def representation(maze: list[list[list[int]]], config: dict[str, str]) -> None:
     
     # Para marcar el path del maze
     current_x, current_y = ENTRY
-    steps = coordinates_path("SENESEESEESWWWSSSEENNEENNNESEENESSWWSSSSSSSEEEEEESEESSSENENWNENWNNWNENNENNWNWNWNWWSESESESWWWNNWWS")
+    steps = coordinates_path(route)
     path_coords = [[current_x, current_y]]
     for dx, dy in steps:
         current_x += dx
