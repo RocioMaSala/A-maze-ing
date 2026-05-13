@@ -1,16 +1,15 @@
-from random import randint, seed, choice
+from random import randint, choice
 from representation import representation
 from queue import Queue
 
 
 class MazeGenerator:
-    def __init__(self, config: dict[str, str]) -> None:
+    def generate_maze(self, config: dict[str, str]) -> None:
         height = int(config["HEIGHT"])
         width = int(config["WIDTH"])
         vis = [[False for i in range(width)] for j in range(height)]
         maze = [[[1 for _ in range(4)] for y in range(width)]
                 for x in range(height)]
-        seed(int(config["SEED"]))
         self.draw_42(vis)
         self.dfs_rec(maze, vis, height, width, 0, 0)
         self.output_file(maze, config)
@@ -215,9 +214,20 @@ class MazeGenerator:
     def imperfect_maze(self, maze: list[list[list[int]]],
                        config: dict[str, str], vis: list[list[bool]]) -> None:
         directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-        while not self.bfs(maze, config, vis, "unique"):
+        while True:
+            vis = [[False] * int(config["WIDTH"])
+                   for _ in range(int(config["HEIGHT"]))]
+            self.draw_42(vis)
+            if self.bfs(maze, config, vis, "unique"):
+                break
             dir = choice(directions)
             y = randint(0, len(maze) - 1)
             x = randint(0, len(maze[0]) - 1)
-            if self.is_wall(maze[y][x], maze[y+dir[0]][x+dir[1]], dir):
+            ny, nx = y + dir[0], x + dir[1]
+            if (0 <= ny < len(maze) and 0 <= nx < len(maze[0])
+                    and self.is_wall(maze[y][x], maze[ny][nx], dir)):
                 self.remove_wall(maze, x, y, dir)
+        vis = [[False] * int(config["WIDTH"])
+               for _ in range(int(config["HEIGHT"]))]
+        self.draw_42(vis)
+        self.bfs(maze, config, vis)

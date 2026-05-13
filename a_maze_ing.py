@@ -1,6 +1,7 @@
 import sys
 from maze_generator import MazeGenerator
-
+from typing import Generator
+from random import seed
 
 class UsageError(Exception):
     def __init__(self, message: str = "Usage Error: python3 a_maze_ing.py "
@@ -43,6 +44,16 @@ def parse_config_line(line: str) -> tuple[str, str]:
     return key.strip(), value.strip()
 
 
+def random_generator(config: dict[str, str]) -> Generator[None, None, None]:
+    maze = MazeGenerator()
+    seed_val = 1
+    while True:
+        seed(seed_val)
+        maze.generate_maze(config)
+        seed_val += 1
+        yield
+
+
 def main() -> None:
     try:
         if len(sys.argv) != 2:
@@ -63,7 +74,9 @@ def main() -> None:
         if EXIT[0] > int(config["WIDTH"]) or EXIT[0] < 0 or EXIT[1] > int(
                 config["HEIGHT"]) or EXIT[1] < 0:
             raise ExitError
-        MazeGenerator(config)
+        generate = random_generator(config)
+        next(generate)
+
     except UsageError as e:
         print(e)
     except FileNotFoundError:
