@@ -3,6 +3,7 @@ from maze_generator import MazeGenerator
 from typing import Generator
 from random import seed
 
+
 class UsageError(Exception):
     def __init__(self, message: str = "Usage Error: python3 a_maze_ing.py "
                  "config.txt") -> None:
@@ -31,6 +32,11 @@ class ExitError(Exception):
                  " boundaries.") -> None:
         super().__init__(message)
 
+class SizeError(Exception):
+    def  __init__(self, message: str = "To show the 42, the maze must be "
+                  "larger than 7x5") -> None:
+        super().__init__(message)
+
 
 def parse_config_line(line: str) -> tuple[str, str]:
     parts = line.split("=", 1)
@@ -53,8 +59,28 @@ def random_generator(config: dict[str, str]) -> Generator[None, None, None]:
         seed_val += 1
         yield
 
+
+def is_in_42(config: dict[str, str]) -> None:
+    vis = [[False for i in range(int(config["WIDTH"]))]
+           for j in range(int(config["HEIGHT"]))]
+    y = round((len(vis) - 5) / 2)
+    x = round((len(vis[0]) - 7) / 2)
+
+    entry_x, entry_y = tuple(int(x) for x in config["ENTRY"].split(","))
+    exit_x, exit_y = tuple(int(x) for x in config["EXIT"].split(","))
+
+    targets = [
+        (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 3), (2, 4),
+        (4, 0), (5, 0), (6, 0), (6, 1), (6, 2), (5, 2), (4, 2),
+        (4, 3), (4, 4), (5, 4), (6, 4)
+    ]
+    if (entry_x - x, entry_y - y) in targets:
+        raise EntryExitError("Entry Exit Error: Entry and exits cannot be "
+                             "inside the 42 drawing")
+
+
 def menu(generate: Generator[None, None, None]):
-    
+
     while True:
         print("== A-Maze-ing ===")
         print("1. Re-generate a new maze")
@@ -69,8 +95,8 @@ def menu(generate: Generator[None, None, None]):
         if option == "1":
             next(generate)
         elif option == "2":
-            if show: # hacer un interruptor
-                print ("Hide!")
+            if show:  # hacer un interruptor
+                print("Hide!")
             else:
                 print("Show!")
         elif option == "3":
@@ -78,6 +104,7 @@ def menu(generate: Generator[None, None, None]):
         elif option == "4":
             print("Thank you! Bye Bye")
             return
+
 
 def main() -> None:
     try:
@@ -99,10 +126,13 @@ def main() -> None:
         if EXIT[0] > int(config["WIDTH"]) or EXIT[0] < 0 or EXIT[1] > int(
                 config["HEIGHT"]) or EXIT[1] < 0:
             raise ExitError
+        if int(config["WIDTH"]) > 7 and int(config["HEIGHT"]) > 5:
+            is_in_42(config)
         generate = random_generator(config)
         next(generate)
+        if int(config["WIDTH"]) <= 7 or int(config["HEIGHT"]) <= 5:
+            raise SizeError
         menu(generate)
-        
 
     except UsageError as e:
         print(e)
@@ -113,6 +143,10 @@ def main() -> None:
     except EntryError as e:
         print(e)
     except ExitError as e:
+        print(e)
+    except SizeError as e:
+        print(e)
+    except ValueError as e:
         print(e)
 
 

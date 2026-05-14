@@ -10,7 +10,8 @@ class MazeGenerator:
         vis = [[False for i in range(width)] for j in range(height)]
         maze = [[[1 for _ in range(4)] for y in range(width)]
                 for x in range(height)]
-        self.draw_42(vis)
+        if int(config["WIDTH"]) > 7 and int(config["HEIGHT"]) > 5:
+            self.draw_42(vis)
         self.dfs_rec(maze, vis, height, width, 0, 0)
         self.output_file(maze, config)
         vis = [[False for i in range(width)] for j in range(height)]
@@ -188,7 +189,7 @@ class MazeGenerator:
 
     def is_wall(self, curr_cell: list[int], next_cell: list[int],
                 direction: tuple[int, int]) -> bool:
-        dir_str = self.get_direction(direction[0], direction[1])  # ← no swap
+        dir_str = self.get_direction(direction[0], direction[1])
         if dir_str == "N":
             if curr_cell[3] == 1 and next_cell[1] == 1:
                 return True
@@ -205,7 +206,7 @@ class MazeGenerator:
 
     def remove_wall(self, maze: list[list[list[int]]], x: int, y: int,
                     dir: tuple[int, int]) -> None:
-        dir_str = self.get_direction(dir[0], dir[1])  # ← no swap
+        dir_str = self.get_direction(dir[0], dir[1])
         if dir_str == "N":
             maze[y][x][3] = 0
             maze[y+dir[0]][x+dir[1]][1] = 0
@@ -219,6 +220,21 @@ class MazeGenerator:
             maze[y][x][0] = 0
             maze[y+dir[0]][x+dir[1]][2] = 0
 
+
+    def is_in_42(self, height: int, width: int, cell_x: int, cell_y: int) -> bool:
+        vis = [[False for i in range(width)] for j in range(height)]
+        y = round((len(vis) - 5) / 2)
+        x = round((len(vis[0]) - 7) / 2)
+
+        targets = [
+            (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 3), (2, 4),
+            (4, 0), (5, 0), (6, 0), (6, 1), (6, 2), (5, 2), (4, 2),
+            (4, 3), (4, 4), (5, 4), (6, 4)
+        ]
+        if (cell_x - x, cell_y - y) in targets:
+            return False
+        return True
+    
     def imperfect_maze(self, maze: list[list[list[int]]],
                        config: dict[str, str], vis: list[list[bool]]) -> None:
         directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
@@ -232,8 +248,9 @@ class MazeGenerator:
             y = randint(0, height - 1)
             x = randint(0, width - 1)
             ny, nx = y + dir[0], x + dir[1]
-            if (0 <= ny < height and 0 <= nx < width
-                    and self.is_wall(maze[y][x], maze[ny][nx], dir)):
-                self.remove_wall(maze, x, y, dir)
+            if self.is_in_42(height, width, x, y):
+                if (0 <= ny < height and 0 <= nx < width
+                        and self.is_wall(maze[y][x], maze[ny][nx], dir)):
+                    self.remove_wall(maze, x, y, dir)
         vis = [[False] * width for _ in range(height)]
         self.bfs(maze, config, vis)
