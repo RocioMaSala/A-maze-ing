@@ -1,6 +1,8 @@
 import sys
 from maze_generator import MazeGenerator
-
+from typing import Generator
+from random import seed
+from representation import representation
 
 class UsageError(Exception):
     def __init__(self, message: str = "Usage Error: python3 a_maze_ing.py "
@@ -43,29 +45,47 @@ def parse_config_line(line: str) -> tuple[str, str]:
     return key.strip(), value.strip()
 
 
-def menu():
-    print("== A-Maze-ing ===")
-    print("1. Re-generate a new maze")
-    print("2. Show/Hide path from entry to exit")
-    print("3. Rotate maze colors")
-    print("4. Quit")
+def random_generator(config: dict[str, str]) -> Generator[tuple, None, None]:
+    maze_gen = MazeGenerator()
+    seed_val = 1
+    while True:
+        seed(seed_val)
+        maze, route = maze_gen.generate_maze(config, False)
+        seed_val += 1
+        yield maze, route
 
-    option = input("Choice? (1-4): ")
+def menu(generate: Generator[None, None, None], config: dict[str, str]):
+    
+    show_path = False
+    current_maze, current_route = next(generate)
+    representation(current_maze, config, current_route, show_path)
 
-    while option not in ("1", "2", "3", "4"):
-        option = input("Invalid choice. Try again (1-4): ")
-    if option == "1":
-        main()
-    elif option == "2":
-        if show: # hacer un interruptor
-            print ("Hide!")
-        else:
-            print("Show!")
-    elif option == "3":
-        print("Let's rotate the colors")
-    elif option == "4":
-        print("Thank you! Bye Bye")
-        return
+    while True:
+        print("== A-Maze-ing ===")
+        print("1. Re-generate a new maze")
+        print("2. Show/Hide path from entry to exit")
+        print("3. Rotate maze colors")
+        print("4. Quit")
+
+        option = input("Choice? (1-4): ")
+
+        while option not in ("1", "2", "3", "4"):
+            option = input("Invalid choice. Try again (1-4): ")
+
+        if option == "1":
+            current_maze, current_route = next(generate)
+            representation(current_maze, config, current_route, show_path)
+
+        elif option == "2":
+            show_path = not show_path
+            representation(current_maze, config, current_route, show_path)
+
+        elif option == "3":
+            print("Let's rotate the colors")
+
+        elif option == "4":
+            print("Thank you! Bye Bye")
+            return
 
 def main() -> None:
     try:
@@ -87,8 +107,10 @@ def main() -> None:
         if EXIT[0] > int(config["WIDTH"]) or EXIT[0] < 0 or EXIT[1] > int(
                 config["HEIGHT"]) or EXIT[1] < 0:
             raise ExitError
-        MazeGenerator(config)
-        menu()
+        generate = random_generator(config)
+        menu(generate, config)
+        
+
     except UsageError as e:
         print(e)
     except FileNotFoundError:

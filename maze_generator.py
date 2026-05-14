@@ -1,24 +1,25 @@
-from random import randint, seed, choice
+from random import randint, choice
 from representation import representation
 from queue import Queue
 
 
 class MazeGenerator:
-    def __init__(self, config: dict[str, str]) -> None:
+    def generate_maze(self, config: dict[str, str], show_path: bool) -> tuple:
         height = int(config["HEIGHT"])
         width = int(config["WIDTH"])
         vis = [[False for i in range(width)] for j in range(height)]
         maze = [[[1 for _ in range(4)] for y in range(width)]
                 for x in range(height)]
-        seed(int(config["SEED"]))
         self.draw_42(vis)
         self.dfs_rec(maze, vis, height, width, 0, 0)
         self.output_file(maze, config)
         vis = [[False for i in range(width)] for j in range(height)]
         if config["PERFECT"] == "True":
-            self.bfs(maze, config, vis)
+            route = self.bfs(maze, config, vis, show_path)
         elif config["PERFECT"] == "False":
             self.imperfect_maze(maze, config, vis)
+        return maze, route
+    
 
     def is_valid_dfs(self, row: int, col: int, vis: list[list[bool]],
                      height: int, width: int) -> bool:
@@ -133,8 +134,8 @@ class MazeGenerator:
         return False
 
     def bfs(self, maze: list[list[list[int]]], config: dict[str, str],
-            vis: list[list[bool]], mode: str = "shortest") -> bool:
-        directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+            vis: list[list[bool]], show_path: bool, mode: str = "shortest") -> bool:
+        directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]  # N, E, S, W
         entry_rev = tuple(int(x) for x in config["ENTRY"].split(","))
         exit_rev = tuple(int(x) for x in config["EXIT"].split(","))
         entry = entry_rev[::-1]
@@ -144,44 +145,52 @@ class MazeGenerator:
         vis[entry[0]][entry[1]] = True
         solutions = []
         shortest_length = None
-        queue: Queue[tuple[tuple[int, ...], list[str]]] = Queue()
-        queue.put((entry, []))
+        queue: Queue[tuple[tuple[int, ...], list[str], set]] = Queue()
+        queue.put((entry, [], {entry}))
         while not queue.empty():
-            (cell, path) = queue.get()
+            (cell, path, path_vis) = queue.get()
             if mode == "shortest":
-                if (shortest_length is not None and
-                        len(path) >= shortest_length):
+                if shortest_length is not None and len(path) >= shortest_length:
                     continue
-            for dx, dy in directions:
-                direction = self.get_direction(dx, dy)
-                next_cell = (cell[0]+dx, cell[1]+dy)
+            for drow, dcol in directions:
+                direction = self.get_direction(drow, dcol)
+                next_cell = (cell[0] + drow, cell[1] + dcol)
                 if (next_cell == exit and
-                        self.valid_direction(maze, cell, next_cell,
-                                             direction)):
+                        self.valid_direction(maze, cell, next_cell, direction)):
                     candidate = path + [direction]
                     if shortest_length is None:
                         shortest_length = len(candidate)
+                    elif len(candidate) != shortest_length:
+                        continue
                     solutions.append(candidate)
                     if mode == "shortest":
+                        route_str = "".join(candidate)
                         with open("output_maze.txt", "a") as f:
-                            route = "".join(candidate)
                             f.write("\n")
-                            f.write(route)
-                            representation(maze, config, route)
-                            return True
+                            f.write(route_str)
+                        return route_str
                     elif len(solutions) > 1:
                         return True
-                if self.is_valid_bfs(next_cell, cell, vis, height,
-                                     width, direction, maze):
-                    vis[next_cell[0]][next_cell[1]] = True
-                    queue.put((next_cell, path + [direction]))
+                if mode == "unique":
+                    if (next_cell[0] >= 0 and next_cell[1] >= 0 and
+                            next_cell[0] < height and next_cell[1] < width and
+                            next_cell not in path_vis and
+                            self.valid_direction(maze, cell, next_cell, direction)):
+                        new_path_vis = path_vis | {next_cell}
+                        queue.put(
+                            (next_cell, path + [direction], new_path_vis))
+                else:
+                    if self.is_valid_bfs(next_cell, cell, vis, height,
+                                         width, direction, maze):
+                        vis[next_cell[0]][next_cell[1]] = True
+                        queue.put((next_cell, path + [direction], path_vis))
         if mode == "unique":
             return False
         return False
 
     def is_wall(self, curr_cell: list[int], next_cell: list[int],
                 direction: tuple[int, int]) -> bool:
-        dir_str = self.get_direction(direction[1], direction[0])
+        dir_str = self.get_direction(direction[0], direction[1])  # ← no swap
         if dir_str == "N":
             if curr_cell[3] == 1 and next_cell[1] == 1:
                 return True
@@ -198,7 +207,7 @@ class MazeGenerator:
 
     def remove_wall(self, maze: list[list[list[int]]], x: int, y: int,
                     dir: tuple[int, int]) -> None:
-        dir_str = self.get_direction(dir[1], dir[0])
+        dir_str = self.get_direction(dir[0], dir[1])  # ← no swap
         if dir_str == "N":
             maze[y][x][3] = 0
             maze[y+dir[0]][x+dir[1]][1] = 0
@@ -215,11 +224,18 @@ class MazeGenerator:
     def imperfect_maze(self, maze: list[list[list[int]]],
                        config: dict[str, str], vis: list[list[bool]]) -> None:
         directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-        while not self.bfs(maze, config, vis, "unique"):
+        height = int(config["HEIGHT"])
+        width = int(config["WIDTH"])
+        while True:
+            vis = [[False] * width for _ in range(height)]
+            if self.bfs(maze, config, vis, "unique"):
+                break
             dir = choice(directions)
-            y = randint(0, len(maze) - 1)
-            x = randint(0, len(maze[0]) - 1)
-            if self.is_wall(maze[y][x], maze[y+dir[0]][x+dir[1]], dir):
+            y = randint(0, height - 1)
+            x = randint(0, width - 1)
+            ny, nx = y + dir[0], x + dir[1]
+            if (0 <= ny < height and 0 <= nx < width
+                    and self.is_wall(maze[y][x], maze[ny][nx], dir)):
                 self.remove_wall(maze, x, y, dir)
-        vis = vis
+        vis = [[False] * width for _ in range(height)]
         self.bfs(maze, config, vis)

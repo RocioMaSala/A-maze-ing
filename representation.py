@@ -7,13 +7,13 @@ COLORS = {
     "pink": "\033[38;2;255;105;180m"
 }
 
-def get_color_wall():
+def get_color_wall() -> None:
     color = input(
         "Choose a color for Walls (blue, red, green, yellow, pink): ").strip().lower()
     return COLORS.get(color, COLORS["green"])
 
 
-def get_color_corner():
+def get_color_corner() -> None:
     color = input(
         "Choose a color for Corners (blue, red, green, yellow, pink): ").strip().lower()
     return COLORS.get(color, COLORS["blue"])
@@ -32,7 +32,7 @@ def coordinates_path(route: str) -> list[tuple[int, int]]:
             directions.append((-1, 0))
     return (directions)
 
-def representation(maze: list[list[list[int]]], config: dict[str, str], route: str) -> None:
+def representation(maze: list[list[list[int]]], config: dict[str, str], route: str, show_path: str) -> None:
     
     COLOR_WALL = get_color_wall()
     COLOR_CORNER = get_color_corner()
@@ -78,13 +78,12 @@ def representation(maze: list[list[list[int]]], config: dict[str, str], route: s
                 middle_line += f"{COLOR_ENTRY} S {RESET}"
             elif [j, i] == EXIT:
                 middle_line += f"{COLOR_EXIT} F {RESET}"
-            elif [j, i] in path_coords:
+            elif show_path and [j, i] in path_coords:
                     middle_line += f"-+-"
-            else:
-                if is_solid:
+            elif is_solid:
                     middle_line += f"{COLOR_42}   {RESET}"    
-                else:
-                    middle_line += "   "
+            else:
+                middle_line += "   "
         middle_line += f"\033[1m{COLOR_WALL}│{RESET}"
         print(middle_line)
 
