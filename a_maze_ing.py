@@ -122,7 +122,13 @@ def parse_config_line(line: str) -> tuple[str, str]:
     return key.strip(), value.strip()
 
 
-def random_generator(config: dict[str, str]) -> Generator[tuple, None, None]:
+def random_generator(
+        config: dict[str, str]
+    ) -> Generator[
+        tuple[list[list[list[int]]], str],
+        None,
+        None
+    ]:
     """
     Generate mazes indefinitely using different random seeds.
 
@@ -130,7 +136,7 @@ def random_generator(config: dict[str, str]) -> Generator[tuple, None, None]:
         config (dict[str, str]): Maze configuration settings.
 
     Returns:
-        Generator[tuple, None, None]: Generator yielding tuples
+        Generator[list[list[list[int]]], str], None, None]: Generator yielding tuples
         containing a maze and its corresponding route.
     """
 
@@ -144,8 +150,12 @@ def random_generator(config: dict[str, str]) -> Generator[tuple, None, None]:
 
 
 def menu(
-        generate: Generator[None, None, None], config: dict[str, str]
-        ) -> None:
+        generate: Generator[
+            tuple[list[list[list[int]]], str],
+            None, None
+        ],
+        config: dict[str, str]
+    ) -> None:
     """
     Display and manage the interactive maze menu.
 
