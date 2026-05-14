@@ -1,24 +1,3 @@
-
-COLORS = {
-    "blue": "\033[34m",
-    "red": "\033[31m",
-    "green": "\033[32m",
-    "yellow": "\033[33m",
-    "pink": "\033[38;2;255;105;180m"
-}
-
-def get_color_wall() -> None:
-    color = input(
-        "Choose a color for Walls (blue, red, green, yellow, pink): ").strip().lower()
-    return COLORS.get(color, COLORS["green"])
-
-
-def get_color_corner() -> None:
-    color = input(
-        "Choose a color for Corners (blue, red, green, yellow, pink): ").strip().lower()
-    return COLORS.get(color, COLORS["blue"])
-
-
 def coordinates_path(route: str) -> list[tuple[int, int]]:
     directions = []
     for x in route:
@@ -32,10 +11,10 @@ def coordinates_path(route: str) -> list[tuple[int, int]]:
             directions.append((-1, 0))
     return (directions)
 
-def representation(maze: list[list[list[int]]], config: dict[str, str], route: str, show_path: str) -> None:
+def representation(maze: list[list[list[int]]], config: dict[str, str], route: str, show_path: bool, color_wall: str) -> None:
     
-    COLOR_WALL = get_color_wall()
-    COLOR_CORNER = get_color_corner()
+   # COLOR_WALL = get_color_wall()
+    COLOR_CORNER = "\033[34m"
     COLOR_42 = "\033[43m"
     COLOR_PATH = "\033[45m"
     COLOR_ENTRY= "\033[1;97;44m"
@@ -64,7 +43,7 @@ def representation(maze: list[list[list[int]]], config: dict[str, str], route: s
     top_line = ""
     for cell in maze[0]:
         top_line += f"{COLOR_CORNER}+{RESET}"
-        top_line += f"\033[1m{COLOR_WALL}───{RESET}"
+        top_line += f"\033[1m{color_wall}───{RESET}"
     top_line += f"{COLOR_CORNER}+{RESET}"
     print(top_line)
 
@@ -73,7 +52,7 @@ def representation(maze: list[list[list[int]]], config: dict[str, str], route: s
         middle_line = ""
         for j, cell in enumerate(row):
             is_solid = all(cell)
-            middle_line += f"\033[1m{COLOR_WALL}│{RESET}" if cell[0] else " "
+            middle_line += f"\033[1m{color_wall}│{RESET}" if cell[0] else " "
             if [j, i] == ENTRY:
                 middle_line += f"{COLOR_ENTRY} S {RESET}"
             elif [j, i] == EXIT:
@@ -84,7 +63,7 @@ def representation(maze: list[list[list[int]]], config: dict[str, str], route: s
                     middle_line += f"{COLOR_42}   {RESET}"    
             else:
                 middle_line += "   "
-        middle_line += f"\033[1m{COLOR_WALL}│{RESET}"
+        middle_line += f"\033[1m{color_wall}│{RESET}"
         print(middle_line)
 
         bottom_line = ""
@@ -93,7 +72,7 @@ def representation(maze: list[list[list[int]]], config: dict[str, str], route: s
             if is_solid:
                 bottom_line += f"{COLOR_42}   {RESET}"
             else:
-                bottom_line += f"\033[1m{COLOR_WALL}───{RESET}" if cell[1] else "   "
+                bottom_line += f"\033[1m{color_wall}───{RESET}" if cell[1] else "   "
         bottom_line += f"{COLOR_CORNER}+{RESET}"
         print(bottom_line)
 

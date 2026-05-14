@@ -4,7 +4,7 @@ from queue import Queue
 
 
 class MazeGenerator:
-    def generate_maze(self, config: dict[str, str], show_path: bool) -> tuple:
+    def generate_maze(self, config: dict[str, str]) -> tuple:
         height = int(config["HEIGHT"])
         width = int(config["WIDTH"])
         vis = [[False for i in range(width)] for j in range(height)]
@@ -15,7 +15,7 @@ class MazeGenerator:
         self.output_file(maze, config)
         vis = [[False for i in range(width)] for j in range(height)]
         if config["PERFECT"] == "True":
-            route = self.bfs(maze, config, vis, show_path)
+            route = self.bfs(maze, config, vis)
         elif config["PERFECT"] == "False":
             self.imperfect_maze(maze, config, vis)
         return maze, route
@@ -134,7 +134,7 @@ class MazeGenerator:
         return False
 
     def bfs(self, maze: list[list[list[int]]], config: dict[str, str],
-            vis: list[list[bool]], show_path: bool, mode: str = "shortest") -> bool:
+            vis: list[list[bool]], mode: str = "shortest") -> bool:
         directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]  # N, E, S, W
         entry_rev = tuple(int(x) for x in config["ENTRY"].split(","))
         exit_rev = tuple(int(x) for x in config["EXIT"].split(","))
@@ -168,6 +168,7 @@ class MazeGenerator:
                         with open("output_maze.txt", "a") as f:
                             f.write("\n")
                             f.write(route_str)
+                            f.write("\n")
                         return route_str
                     elif len(solutions) > 1:
                         return True

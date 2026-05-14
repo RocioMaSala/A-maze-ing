@@ -50,7 +50,7 @@ def random_generator(config: dict[str, str]) -> Generator[tuple, None, None]:
     seed_val = 1
     while True:
         seed(seed_val)
-        maze, route = maze_gen.generate_maze(config, False)
+        maze, route = maze_gen.generate_maze(config)
         seed_val += 1
         yield maze, route
 
@@ -58,13 +58,14 @@ def menu(generate: Generator[None, None, None], config: dict[str, str]):
     
     show_path = False
     current_maze, current_route = next(generate)
-    representation(current_maze, config, current_route, show_path)
+    color_wall = "\033[32m"
+    representation(current_maze, config, current_route, show_path, color_wall)
 
     while True:
         print("== A-Maze-ing ===")
         print("1. Re-generate a new maze")
         print("2. Show/Hide path from entry to exit")
-        print("3. Rotate maze colors")
+        print("3. Rotate maze wall colors")
         print("4. Quit")
 
         option = input("Choice? (1-4): ")
@@ -74,14 +75,24 @@ def menu(generate: Generator[None, None, None], config: dict[str, str]):
 
         if option == "1":
             current_maze, current_route = next(generate)
-            representation(current_maze, config, current_route, show_path)
+            representation(current_maze, config, current_route, show_path, color_wall)
 
         elif option == "2":
             show_path = not show_path
-            representation(current_maze, config, current_route, show_path)
+            representation(current_maze, config, current_route, show_path, color_wall)
 
         elif option == "3":
+            COLORS = {
+                    "blue": "\033[34m",
+                    "red": "\033[31m",
+                    "green": "\033[32m",
+                    "yellow": "\033[33m",
+                    "pink": "\033[38;2;255;105;180m"
+                }
             print("Let's rotate the colors")
+            color = input("What color do you prefer?(blue, red, green, yellow, pink): ").strip().lower()
+            color_wall = COLORS[color]
+            representation(current_maze, config, current_route, show_path, color_wall)
 
         elif option == "4":
             print("Thank you! Bye Bye")
