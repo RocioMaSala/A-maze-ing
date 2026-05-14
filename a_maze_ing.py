@@ -1,6 +1,7 @@
 import sys
 from maze_generator import MazeGenerator
-
+from typing import Generator
+from random import seed
 
 class UsageError(Exception):
     def __init__(self, message: str = "Usage Error: python3 a_maze_ing.py "
@@ -43,29 +44,40 @@ def parse_config_line(line: str) -> tuple[str, str]:
     return key.strip(), value.strip()
 
 
-def menu():
-    print("== A-Maze-ing ===")
-    print("1. Re-generate a new maze")
-    print("2. Show/Hide path from entry to exit")
-    print("3. Rotate maze colors")
-    print("4. Quit")
+def random_generator(config: dict[str, str]) -> Generator[None, None, None]:
+    maze = MazeGenerator()
+    seed_val = 1
+    while True:
+        seed(seed_val)
+        maze.generate_maze(config)
+        seed_val += 1
+        yield
 
-    option = input("Choice? (1-4): ")
+def menu(generate: Generator[None, None, None]):
+    
+    while True:
+        print("== A-Maze-ing ===")
+        print("1. Re-generate a new maze")
+        print("2. Show/Hide path from entry to exit")
+        print("3. Rotate maze colors")
+        print("4. Quit")
 
-    while option not in ("1", "2", "3", "4"):
-        option = input("Invalid choice. Try again (1-4): ")
-    if option == "1":
-        main()
-    elif option == "2":
-        if show: # hacer un interruptor
-            print ("Hide!")
-        else:
-            print("Show!")
-    elif option == "3":
-        print("Let's rotate the colors")
-    elif option == "4":
-        print("Thank you! Bye Bye")
-        return
+        option = input("Choice? (1-4): ")
+
+        while option not in ("1", "2", "3", "4"):
+            option = input("Invalid choice. Try again (1-4): ")
+        if option == "1":
+            next(generate)
+        elif option == "2":
+            if show: # hacer un interruptor
+                print ("Hide!")
+            else:
+                print("Show!")
+        elif option == "3":
+            print("Let's rotate the colors")
+        elif option == "4":
+            print("Thank you! Bye Bye")
+            return
 
 def main() -> None:
     try:
@@ -87,8 +99,11 @@ def main() -> None:
         if EXIT[0] > int(config["WIDTH"]) or EXIT[0] < 0 or EXIT[1] > int(
                 config["HEIGHT"]) or EXIT[1] < 0:
             raise ExitError
-        MazeGenerator(config)
-        menu()
+        generate = random_generator(config)
+        next(generate)
+        menu(generate)
+        
+
     except UsageError as e:
         print(e)
     except FileNotFoundError:
