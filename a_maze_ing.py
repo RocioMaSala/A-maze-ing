@@ -161,13 +161,33 @@ def random_generator(
         yield maze, route
 
 
+
+def is_in_42(config: dict[str, str]) -> None:
+    vis = [[False for i in range(int(config["WIDTH"]))]
+           for j in range(int(config["HEIGHT"]))]
+    y = round((len(vis) - 5) / 2)
+    x = round((len(vis[0]) - 7) / 2)
+
+    entry_x, entry_y = tuple(int(x) for x in config["ENTRY"].split(","))
+    exit_x, exit_y = tuple(int(x) for x in config["EXIT"].split(","))
+
+    targets = [
+        (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 3), (2, 4),
+        (4, 0), (5, 0), (6, 0), (6, 1), (6, 2), (5, 2), (4, 2),
+        (4, 3), (4, 4), (5, 4), (6, 4)
+    ]
+    if (entry_x - x, entry_y - y) in targets:
+        raise EntryExitError("Entry Exit Error: Entry and exits cannot be "
+                             "inside the 42 drawing")
+
+
 def menu(
-    generate: Generator[
-        tuple[list[list[list[int]]], str],
-        None, None
-    ],
-    config: dict[str, str]
-) -> None:
+        generate: Generator[
+            tuple[list[list[list[int]]], str],
+            None, None
+        ],
+        config: dict[str, str]
+    ) -> None:
     """
     Display and manage the interactive maze menu.
 
@@ -190,28 +210,6 @@ def menu(
     color_wall = "\033[32m"
     representation(current_maze, config, current_route, show_path, color_wall)
 
-
-def is_in_42(config: dict[str, str]) -> None:
-    vis = [[False for i in range(int(config["WIDTH"]))]
-           for j in range(int(config["HEIGHT"]))]
-    y = round((len(vis) - 5) / 2)
-    x = round((len(vis[0]) - 7) / 2)
-
-    entry_x, entry_y = tuple(int(x) for x in config["ENTRY"].split(","))
-    exit_x, exit_y = tuple(int(x) for x in config["EXIT"].split(","))
-
-    targets = [
-        (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 3), (2, 4),
-        (4, 0), (5, 0), (6, 0), (6, 1), (6, 2), (5, 2), (4, 2),
-        (4, 3), (4, 4), (5, 4), (6, 4)
-    ]
-    if (entry_x - x, entry_y - y) in targets:
-        raise EntryExitError("Entry Exit Error: Entry and exits cannot be "
-                             "inside the 42 drawing")
-
-
-def menu(generate: Generator[None, None, None]):
-
     while True:
         print("== A-Maze-ing ===")
         print("1. Re-generate a new maze")
@@ -228,30 +226,30 @@ def menu(generate: Generator[None, None, None]):
             current_maze, current_route = next(generate)
             representation(
                 current_maze, config, current_route, show_path, color_wall
-            )
+                )
 
         elif option == "2":
             show_path = not show_path
             representation(
                 current_maze, config, current_route, show_path, color_wall
-            )
+                )
 
         elif option == "3":
             COLORS = {
-                "blue": "\033[34m",
-                "red": "\033[31m",
-                "green": "\033[32m",
-                "yellow": "\033[33m",
-                "pink": "\033[38;2;255;105;180m"
-            }
+                    "blue": "\033[34m",
+                    "red": "\033[31m",
+                    "green": "\033[32m",
+                    "yellow": "\033[33m",
+                    "pink": "\033[38;2;255;105;180m"
+                }
             print("Let's rotate the colors")
             color = input(
                 "What color do you prefer?(blue, red, green, yellow, pink): "
-            ).strip().lower()
+                ).strip().lower()
             color_wall = COLORS[color]
             representation(
                 current_maze, config, current_route, show_path, color_wall
-            )
+                )
 
         elif option == "4":
             print("Thank you! Bye Bye")
