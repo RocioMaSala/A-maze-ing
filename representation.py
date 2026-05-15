@@ -86,6 +86,7 @@ def representation(
 
     for i, row in enumerate(maze):
         middle_line = ""
+        is_solid = False
         for j, cell in enumerate(row):
             is_solid = all(cell)
             middle_line += f"\033[1m{color_wall}│{RESET}" if cell[0] else " "

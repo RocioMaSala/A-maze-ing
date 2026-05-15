@@ -1,4 +1,4 @@
-from random import randint, choice, shuffle
+from random import randint, shuffle
 from queue import Queue
 
 
@@ -154,7 +154,8 @@ class MazeGenerator:
                 direction = self.get_direction(drow, dcol)
                 next_cell = (cell[0] + drow, cell[1] + dcol)
                 if (next_cell == exit and
-                        self.valid_direction(maze, cell, next_cell, direction)):
+                        self.valid_direction(maze, cell, next_cell,
+                                             direction)):
                     candidate = path + [direction]
                     if shortest_length is None:
                         shortest_length = len(candidate)
@@ -274,10 +275,13 @@ class MazeGenerator:
                 for drow, dcol in directions:
                     ny, nx = y + drow, x + dcol
                     if (0 <= ny < height and 0 <= nx < width and
-                        not self.is_in_42(height, width, nx, ny)):
-                            if self.is_wall(maze[y][x], maze[ny][nx], (drow, dcol)):
-                                if not self.creates_large_open_area(maze, x, y, (drow, dcol), height, width):
-                                    removable.append((x, y, drow, dcol))
+                            not self.is_in_42(height, width, nx, ny)):
+                        if self.is_wall(maze[y][x], maze[ny][nx],
+                                        (drow, dcol)):
+                            if not self.creates_large_open_area(maze, x, y,
+                                                                (drow, dcol),
+                                                                height, width):
+                                removable.append((x, y, drow, dcol))
 
         shuffle(removable)
         num_to_remove = max(1, len(removable) // 10)
