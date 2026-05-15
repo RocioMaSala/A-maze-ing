@@ -1,4 +1,4 @@
-from random import randint, choice
+from random import randint, choice, shuffle
 from queue import Queue
 
 
@@ -18,7 +18,7 @@ class MazeGenerator:
         if config["PERFECT"] == "True":
             route = self.bfs(maze, config, vis)
         elif config["PERFECT"] == "False":
-            self.imperfect_maze(maze, config, vis)
+            route = self.imperfect_maze(maze, config, vis)
         return maze, route
 
     def is_valid_dfs(self, row: int, col: int, vis: list[list[bool]],
@@ -134,8 +134,8 @@ class MazeGenerator:
         return False
 
     def bfs(self, maze: list[list[list[int]]], config: dict[str, str],
-            vis: list[list[bool]], mode: str = "shortest") -> bool:
-        directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]  # N, E, S, W
+            vis: list[list[bool]]) -> str:
+        directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
         entry_rev = tuple(int(x) for x in config["ENTRY"].split(","))
         exit_rev = tuple(int(x) for x in config["EXIT"].split(","))
         entry = entry_rev[::-1]
@@ -143,54 +143,32 @@ class MazeGenerator:
         height = int(config["HEIGHT"])
         width = int(config["WIDTH"])
         vis[entry[0]][entry[1]] = True
-        solutions = []
         shortest_length = None
         queue: Queue[tuple[tuple[int, ...], list[str], set]] = Queue()
         queue.put((entry, [], {entry}))
         while not queue.empty():
             (cell, path, path_vis) = queue.get()
-            if mode == "shortest":
-                if (shortest_length is not None and
-                        len(path) >= shortest_length):
-                    continue
+            if shortest_length is not None and len(path) >= shortest_length:
+                continue
             for drow, dcol in directions:
                 direction = self.get_direction(drow, dcol)
                 next_cell = (cell[0] + drow, cell[1] + dcol)
                 if (next_cell == exit and
-                        self.valid_direction(maze, cell, next_cell,
-                                             direction)):
+                        self.valid_direction(maze, cell, next_cell, direction)):
                     candidate = path + [direction]
                     if shortest_length is None:
                         shortest_length = len(candidate)
-                    elif len(candidate) != shortest_length:
-                        continue
-                    solutions.append(candidate)
-                    if mode == "shortest":
-                        route_str = "".join(candidate)
-                        with open("output_maze.txt", "a") as f:
-                            f.write("\n")
-                            f.write(route_str)
-                            f.write("\n")
-                        return route_str
-                    elif len(solutions) > 1:
-                        return True
-                if mode == "unique":
-                    if (next_cell[0] >= 0 and next_cell[1] >= 0 and
-                            next_cell[0] < height and next_cell[1] < width and
-                            next_cell not in path_vis and
-                            self.valid_direction(maze, cell, next_cell,
-                                                 direction)):
-                        new_path_vis = path_vis | {next_cell}
-                        queue.put(
-                            (next_cell, path + [direction], new_path_vis))
-                else:
-                    if self.is_valid_bfs(next_cell, cell, vis, height,
-                                         width, direction, maze):
-                        vis[next_cell[0]][next_cell[1]] = True
-                        queue.put((next_cell, path + [direction], path_vis))
-        if mode == "unique":
-            return False
-        return False
+                    route_str = "".join(candidate)
+                    with open("output_maze.txt", "a") as f:
+                        f.write("\n")
+                        f.write(route_str)
+                        f.write("\n")
+                    return route_str
+                if self.is_valid_bfs(next_cell, cell, vis, height,
+                                     width, direction, maze):
+                    vis[next_cell[0]][next_cell[1]] = True
+                    queue.put((next_cell, path + [direction], path_vis))
+        return ""
 
     def is_wall(self, curr_cell: list[int], next_cell: list[int],
                 direction: tuple[int, int]) -> bool:
@@ -208,6 +186,22 @@ class MazeGenerator:
             if curr_cell[0] == 1 and next_cell[2] == 1:
                 return True
         return False
+
+    def add_wall(self, maze: list[list[list[int]]], x: int, y: int,
+                 dir: tuple[int, int]) -> None:
+        dir_str = self.get_direction(dir[0], dir[1])
+        if dir_str == "N":
+            maze[y][x][3] = 1
+            maze[y + dir[0]][x + dir[1]][1] = 1
+        elif dir_str == "E":
+            maze[y][x][2] = 1
+            maze[y + dir[0]][x + dir[1]][0] = 1
+        elif dir_str == "S":
+            maze[y][x][1] = 1
+            maze[y + dir[0]][x + dir[1]][3] = 1
+        else:
+            maze[y][x][0] = 1
+            maze[y + dir[0]][x + dir[1]][2] = 1
 
     def remove_wall(self, maze: list[list[list[int]]], x: int, y: int,
                     dir: tuple[int, int]) -> None:
@@ -227,35 +221,71 @@ class MazeGenerator:
 
     def is_in_42(self, height: int, width: int, cell_x: int,
                  cell_y: int) -> bool:
-        vis = [[False for i in range(width)] for j in range(height)]
-        y = round((len(vis) - 5) / 2)
-        x = round((len(vis[0]) - 7) / 2)
+        y = round((height - 5) / 2)
+        x = round((width - 7) / 2)
 
-        targets = [
-            (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 3), (2, 4),
-            (4, 0), (5, 0), (6, 0), (6, 1), (6, 2), (5, 2), (4, 2),
-            (4, 3), (4, 4), (5, 4), (6, 4)
-        ]
-        if (cell_x - x, cell_y - y) in targets:
-            return False
-        return True
+        targets = {
+            (0, 0), (1, 0), (2, 0), (2, 1), (2, 2), (3, 2), (4, 2),
+            (0, 4), (0, 5), (0, 6), (1, 6), (2, 6),
+            (2, 5), (2, 4), (3, 4), (4, 4), (4, 5), (4, 6)
+        }
+
+        y_offset = cell_y - y
+        x_offset = cell_x - x
+        if (y_offset, x_offset) in targets:
+            return True
+        return False
+
+    def creates_large_open_area(self, maze: list[list[list[int]]], x: int,
+                                y: int, dir: tuple[int, int],
+                                height: int, width: int) -> bool:
+        self.remove_wall(maze, x, y, dir)
+        ny, nx = y + dir[0], x + dir[1]
+        cells_to_check = [(y, x), (ny, nx)]
+        for cy, cx in cells_to_check:
+            for dy in range(-1, 1):
+                for dx in range(-1, 1):
+                    top_y, top_x = cy + dy, cx + dx
+                    if 0 <= top_y < height - 1 and 0 <= top_x < width - 1:
+                        if (maze[top_y][top_x][2] == 0 and
+                                maze[top_y][top_x + 1][0] == 0 and
+                                maze[top_y][top_x][1] == 0 and
+                                maze[top_y + 1][top_x][3] == 0 and
+                                maze[top_y][top_x + 1][1] == 0 and
+                                maze[top_y + 1][top_x + 1][3] == 0 and
+                                maze[top_y + 1][top_x][2] == 0 and
+                                maze[top_y + 1][top_x + 1][0] == 0):
+                            self.add_wall(maze, x, y, dir)
+                            return True
+        self.add_wall(maze, x, y, dir)
+        return False
 
     def imperfect_maze(self, maze: list[list[list[int]]],
-                       config: dict[str, str], vis: list[list[bool]]) -> None:
+                       config: dict[str, str], vis: list[list[bool]]) -> str:
         directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
         height = int(config["HEIGHT"])
         width = int(config["WIDTH"])
-        while True:
-            vis = [[False] * width for _ in range(height)]
-            if self.bfs(maze, config, vis, "unique"):
-                break
-            dir = choice(directions)
-            y = randint(0, height - 1)
-            x = randint(0, width - 1)
-            ny, nx = y + dir[0], x + dir[1]
-            if self.is_in_42(height, width, x, y):
-                if (0 <= ny < height and 0 <= nx < width
-                        and self.is_wall(maze[y][x], maze[ny][nx], dir)):
-                    self.remove_wall(maze, x, y, dir)
+
+        removable = []
+        for y in range(height):
+            for x in range(width):
+                if self.is_in_42(height, width, x, y):
+                    continue
+                for drow, dcol in directions:
+                    ny, nx = y + drow, x + dcol
+                    if (0 <= ny < height and 0 <= nx < width and
+                        not self.is_in_42(height, width, nx, ny)):
+                            if self.is_wall(maze[y][x], maze[ny][nx], (drow, dcol)):
+                                if not self.creates_large_open_area(maze, x, y, (drow, dcol), height, width):
+                                    removable.append((x, y, drow, dcol))
+
+        shuffle(removable)
+        num_to_remove = max(1, len(removable) // 10)
+
+        for i in range(num_to_remove):
+            if i < len(removable):
+                x, y, drow, dcol = removable[i]
+                self.remove_wall(maze, x, y, (drow, dcol))
+
         vis = [[False] * width for _ in range(height)]
-        self.bfs(maze, config, vis)
+        return self.bfs(maze, config, vis)

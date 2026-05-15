@@ -161,7 +161,6 @@ def random_generator(
         yield maze, route
 
 
-
 def is_in_42(config: dict[str, str]) -> None:
     vis = [[False for i in range(int(config["WIDTH"]))]
            for j in range(int(config["HEIGHT"]))]
@@ -182,12 +181,12 @@ def is_in_42(config: dict[str, str]) -> None:
 
 
 def menu(
-        generate: Generator[
-            tuple[list[list[list[int]]], str],
-            None, None
-        ],
-        config: dict[str, str]
-    ) -> None:
+    generate: Generator[
+        tuple[list[list[list[int]]], str],
+        None, None
+    ],
+    config: dict[str, str]
+) -> None:
     """
     Display and manage the interactive maze menu.
 
@@ -226,30 +225,30 @@ def menu(
             current_maze, current_route = next(generate)
             representation(
                 current_maze, config, current_route, show_path, color_wall
-                )
+            )
 
         elif option == "2":
             show_path = not show_path
             representation(
                 current_maze, config, current_route, show_path, color_wall
-                )
+            )
 
         elif option == "3":
             COLORS = {
-                    "blue": "\033[34m",
-                    "red": "\033[31m",
-                    "green": "\033[32m",
-                    "yellow": "\033[33m",
-                    "pink": "\033[38;2;255;105;180m"
-                }
+                "blue": "\033[34m",
+                "red": "\033[31m",
+                "green": "\033[32m",
+                "yellow": "\033[33m",
+                "pink": "\033[38;2;255;105;180m"
+            }
             print("Let's rotate the colors")
             color = input(
                 "What color do you prefer?(blue, red, green, yellow, pink): "
-                ).strip().lower()
+            ).strip().lower()
             color_wall = COLORS[color]
             representation(
                 current_maze, config, current_route, show_path, color_wall
-                )
+            )
 
         elif option == "4":
             print("Thank you! Bye Bye")
@@ -297,7 +296,6 @@ def main() -> None:
         if int(config["WIDTH"]) > 7 and int(config["HEIGHT"]) > 5:
             is_in_42(config)
         generate = random_generator(config)
-        next(generate)
         if int(config["WIDTH"]) <= 7 or int(config["HEIGHT"]) <= 5:
             raise SizeError
         menu(generate, config)
