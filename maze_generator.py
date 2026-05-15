@@ -1,5 +1,4 @@
 from random import randint, choice
-from representation import representation
 from queue import Queue
 
 
@@ -15,12 +14,12 @@ class MazeGenerator:
         self.dfs_rec(maze, vis, height, width, 0, 0)
         self.output_file(maze, config)
         vis = [[False for i in range(width)] for j in range(height)]
+        route = ""
         if config["PERFECT"] == "True":
             route = self.bfs(maze, config, vis)
         elif config["PERFECT"] == "False":
             self.imperfect_maze(maze, config, vis)
         return maze, route
-    
 
     def is_valid_dfs(self, row: int, col: int, vis: list[list[bool]],
                      height: int, width: int) -> bool:
@@ -151,13 +150,15 @@ class MazeGenerator:
         while not queue.empty():
             (cell, path, path_vis) = queue.get()
             if mode == "shortest":
-                if shortest_length is not None and len(path) >= shortest_length:
+                if (shortest_length is not None and
+                        len(path) >= shortest_length):
                     continue
             for drow, dcol in directions:
                 direction = self.get_direction(drow, dcol)
                 next_cell = (cell[0] + drow, cell[1] + dcol)
                 if (next_cell == exit and
-                        self.valid_direction(maze, cell, next_cell, direction)):
+                        self.valid_direction(maze, cell, next_cell,
+                                             direction)):
                     candidate = path + [direction]
                     if shortest_length is None:
                         shortest_length = len(candidate)
@@ -177,7 +178,8 @@ class MazeGenerator:
                     if (next_cell[0] >= 0 and next_cell[1] >= 0 and
                             next_cell[0] < height and next_cell[1] < width and
                             next_cell not in path_vis and
-                            self.valid_direction(maze, cell, next_cell, direction)):
+                            self.valid_direction(maze, cell, next_cell,
+                                                 direction)):
                         new_path_vis = path_vis | {next_cell}
                         queue.put(
                             (next_cell, path + [direction], new_path_vis))
@@ -223,8 +225,8 @@ class MazeGenerator:
             maze[y][x][0] = 0
             maze[y+dir[0]][x+dir[1]][2] = 0
 
-
-    def is_in_42(self, height: int, width: int, cell_x: int, cell_y: int) -> bool:
+    def is_in_42(self, height: int, width: int, cell_x: int,
+                 cell_y: int) -> bool:
         vis = [[False for i in range(width)] for j in range(height)]
         y = round((len(vis) - 5) / 2)
         x = round((len(vis[0]) - 7) / 2)
@@ -237,7 +239,7 @@ class MazeGenerator:
         if (cell_x - x, cell_y - y) in targets:
             return False
         return True
-    
+
     def imperfect_maze(self, maze: list[list[list[int]]],
                        config: dict[str, str], vis: list[list[bool]]) -> None:
         directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]

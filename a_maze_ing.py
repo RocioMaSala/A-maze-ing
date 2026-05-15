@@ -5,11 +5,11 @@ from random import seed
 from representation import representation
 
 
-
 class UsageError(Exception):
     """
     Exception raised when the program is executed with invalid arguments.
     """
+
     def __init__(self, message: str = "Usage Error: python3 a_maze_ing.py "
                  "config.txt") -> None:
         """
@@ -28,6 +28,7 @@ class EntryExitError(Exception):
     """
     Exception raised when entry and exit coordinates are identical.
     """
+
     def __init__(self, message: str = "Entry Exit Error: Entry and exit "
                  "points need to be in different positions.") -> None:
         """
@@ -46,6 +47,7 @@ class ConfigSyntaxError(Exception):
     """
     Exception raised when the configuration file syntax is invalid.
     """
+
     def __init__(self, message: str = "Invalid config file syntax.") -> None:
         """
         Initialize the exception with a custom error message.
@@ -63,6 +65,7 @@ class EntryError(Exception):
     """
     Exception raised when entry coordinates are outside maze boundaries.
     """
+
     def __init__(self, message: str = "Entry coordinates must be within maze"
                  " boundaries.") -> None:
         """
@@ -81,6 +84,7 @@ class ExitError(Exception):
     """
     Exception raised when exit coordinates are outside maze boundaries.
     """
+
     def __init__(self, message: str = "Exit coordinates must be within maze"
                  " boundaries.") -> None:
         """
@@ -94,9 +98,10 @@ class ExitError(Exception):
         """
         super().__init__(message)
 
+
 class SizeError(Exception):
-    def  __init__(self, message: str = "To show the 42, the maze must be "
-                  "larger than 7x5") -> None:
+    def __init__(self, message: str = "To show the 42, the maze must be "
+                 "larger than 7x5") -> None:
         super().__init__(message)
 
 
@@ -134,7 +139,7 @@ def random_generator(
         tuple[list[list[list[int]]], str],
         None,
         None
-    ]:
+]:
     """
     Generate mazes indefinitely using different random seeds.
 
@@ -142,7 +147,8 @@ def random_generator(
         config (dict[str, str]): Maze configuration settings.
 
     Returns:
-        Generator[list[list[list[int]]], str], None, None]: Generator yielding tuples
+        Generator[list[list[list[int]]], str], None, None]: Generator
+        yielding tuples
         containing a maze and its corresponding route.
     """
 
@@ -156,12 +162,12 @@ def random_generator(
 
 
 def menu(
-        generate: Generator[
-            tuple[list[list[list[int]]], str],
-            None, None
-        ],
-        config: dict[str, str]
-    ) -> None:
+    generate: Generator[
+        tuple[list[list[list[int]]], str],
+        None, None
+    ],
+    config: dict[str, str]
+) -> None:
     """
     Display and manage the interactive maze menu.
 
@@ -222,30 +228,30 @@ def menu(generate: Generator[None, None, None]):
             current_maze, current_route = next(generate)
             representation(
                 current_maze, config, current_route, show_path, color_wall
-                )
+            )
 
         elif option == "2":
             show_path = not show_path
             representation(
                 current_maze, config, current_route, show_path, color_wall
-                )
+            )
 
         elif option == "3":
             COLORS = {
-                    "blue": "\033[34m",
-                    "red": "\033[31m",
-                    "green": "\033[32m",
-                    "yellow": "\033[33m",
-                    "pink": "\033[38;2;255;105;180m"
-                }
+                "blue": "\033[34m",
+                "red": "\033[31m",
+                "green": "\033[32m",
+                "yellow": "\033[33m",
+                "pink": "\033[38;2;255;105;180m"
+            }
             print("Let's rotate the colors")
             color = input(
                 "What color do you prefer?(blue, red, green, yellow, pink): "
-                ).strip().lower()
+            ).strip().lower()
             color_wall = COLORS[color]
             representation(
                 current_maze, config, current_route, show_path, color_wall
-                )
+            )
 
         elif option == "4":
             print("Thank you! Bye Bye")
