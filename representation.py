@@ -95,7 +95,7 @@ def representation(
             elif [j, i] == EXIT:
                 middle_line += f"{COLOR_EXIT} F {RESET}"
             elif show_path and [j, i] in path_coords:
-                middle_line += "-+-"
+                middle_line += " # "
             elif is_solid:
                 middle_line += f"{COLOR_42}   {RESET}"
             else:

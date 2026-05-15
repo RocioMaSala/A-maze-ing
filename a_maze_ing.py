@@ -205,6 +205,7 @@ def menu(
         None
     """
     show_path = False
+    color_index = 0
     current_maze, current_route = next(generate)
     color_wall = "\033[32m"
     representation(current_maze, config, current_route, show_path, color_wall)
@@ -234,18 +235,18 @@ def menu(
             )
 
         elif option == "3":
-            COLORS = {
-                "blue": "\033[34m",
-                "red": "\033[31m",
-                "green": "\033[32m",
-                "yellow": "\033[33m",
-                "pink": "\033[38;2;255;105;180m"
-            }
+            COLORS = [
+                "\033[34m",
+                "\033[31m",
+                "\033[32m",
+                "\033[33m",
+                "\033[38;2;255;105;180m"
+            ]
             print("Let's rotate the colors")
-            color = input(
-                "What color do you prefer?(blue, red, green, yellow, pink): "
-            ).strip().lower()
-            color_wall = COLORS[color]
+            color_wall = COLORS[color_index]
+            color_index += 1
+            if color_index >= len(COLORS):
+                color_index = 0
             representation(
                 current_maze, config, current_route, show_path, color_wall
             )
