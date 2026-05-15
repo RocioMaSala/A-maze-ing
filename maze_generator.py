@@ -4,7 +4,7 @@ from queue import Queue
 
 
 class MazeGenerator:
-    def generate_maze(self, config: dict[str, str]) -> None:
+    def generate_maze(self, config: dict[str, str]) -> tuple:
         height = int(config["HEIGHT"])
         width = int(config["WIDTH"])
         vis = [[False for i in range(width)] for j in range(height)]
@@ -16,9 +16,11 @@ class MazeGenerator:
         self.output_file(maze, config)
         vis = [[False for i in range(width)] for j in range(height)]
         if config["PERFECT"] == "True":
-            self.bfs(maze, config, vis)
+            route = self.bfs(maze, config, vis)
         elif config["PERFECT"] == "False":
             self.imperfect_maze(maze, config, vis)
+        return maze, route
+    
 
     def is_valid_dfs(self, row: int, col: int, vis: list[list[bool]],
                      height: int, width: int) -> bool:
@@ -163,11 +165,12 @@ class MazeGenerator:
                         continue
                     solutions.append(candidate)
                     if mode == "shortest":
+                        route_str = "".join(candidate)
                         with open("output_maze.txt", "a") as f:
                             f.write("\n")
-                            f.write("".join(candidate))
-                            representation(maze, config, "".join(candidate))
-                        return True
+                            f.write(route_str)
+                            f.write("\n")
+                        return route_str
                     elif len(solutions) > 1:
                         return True
                 if mode == "unique":

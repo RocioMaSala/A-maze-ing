@@ -1,25 +1,23 @@
-
-COLORS = {
-    "blue": "\033[34m",
-    "red": "\033[31m",
-    "green": "\033[32m",
-    "yellow": "\033[33m",
-    "pink": "\033[38;2;255;105;180m"
-}
-
-def get_color_wall():
-    color = input(
-        "Choose a color for Walls (blue, red, green, yellow, pink): ").strip().lower()
-    return COLORS.get(color, COLORS["green"])
-
-
-def get_color_corner():
-    color = input(
-        "Choose a color for Corners (blue, red, green, yellow, pink): ").strip().lower()
-    return COLORS.get(color, COLORS["blue"])
-
-
 def coordinates_path(route: str) -> list[tuple[int, int]]:
+    """
+    Convert a route string into coordinate movements.
+
+    Each character in the route represents a cardinal direction:
+    - "N" → north
+    - "S" → south
+    - "E" → east
+    - "W" → west
+
+    The function translates these directions into `(x, y)` coordinate
+    displacements.
+
+    Args:
+        route (str): String containing movement directions.
+
+    Returns:
+        list[tuple[int, int]]: List of coordinate displacements
+        corresponding to the given route.
+    """
     directions = []
     for x in route:
         if x == "N":
@@ -32,13 +30,33 @@ def coordinates_path(route: str) -> list[tuple[int, int]]:
             directions.append((-1, 0))
     return (directions)
 
-def representation(maze: list[list[list[int]]], config: dict[str, str], route: str) -> None:
-    
-    COLOR_WALL = get_color_wall()
-    COLOR_CORNER = get_color_corner()
+
+def representation(
+        maze: list[list[list[int]]],
+        config: dict[str, str],
+        route: str, show_path: bool, color_wall: str
+        ) -> None:
+    """
+    Display a graphical representation of the maze in the terminal.
+
+    The function renders maze walls, entry and exit points, solid blocks,
+    and optionally the solution path using ASCCI escape color codes.
+
+    Args:
+        maze (list[list[list[int]]]): Matrix representing the maze
+            structure and walls.
+        config (dict[str, str]): Dictionary containing maze configuration,
+            including entry and exit coordinates.
+        route (str): String describing the movement path through the maze.
+        show_path (bool): If True, the solution path is displayed.
+        color_wall (str): ASCII color code used to draw maze walls.
+
+    Returns:
+        None
+    """
+    COLOR_CORNER = "\033[34m"
     COLOR_42 = "\033[43m"
-    COLOR_PATH = "\033[45m"
-    COLOR_ENTRY= "\033[1;97;44m"
+    COLOR_ENTRY = "\033[1;97;44m"
     COLOR_EXIT = "\033[1;97;41m"
     RESET = "\033[0m"
     ENTRY_STR = config["ENTRY"].split(",")
@@ -50,42 +68,38 @@ def representation(maze: list[list[list[int]]], config: dict[str, str], route: s
         ENTRY.append(int(x))
     for x in EXIT_STR:
         EXIT.append(int(x))
-    
-    # Para marcar el path del maze
+
     current_x, current_y = ENTRY
     steps = coordinates_path(route)
     path_coords = [[current_x, current_y]]
     for dx, dy in steps:
         current_x += dx
         current_y += dy
-        path_coords.append([current_x, current_y]) 
+        path_coords.append([current_x, current_y])
 
-    # Dibujar paredes y esquinas / inicio y final
     top_line = ""
     for cell in maze[0]:
         top_line += f"{COLOR_CORNER}+{RESET}"
-        top_line += f"\033[1m{COLOR_WALL}───{RESET}"
+        top_line += f"\033[1m{color_wall}───{RESET}"
     top_line += f"{COLOR_CORNER}+{RESET}"
     print(top_line)
 
-    # con "enumerate" puedes recorrer lista por índice y por contenido
     for i, row in enumerate(maze):
         middle_line = ""
         for j, cell in enumerate(row):
             is_solid = all(cell)
-            middle_line += f"\033[1m{COLOR_WALL}│{RESET}" if cell[0] else " "
+            middle_line += f"\033[1m{color_wall}│{RESET}" if cell[0] else " "
             if [j, i] == ENTRY:
                 middle_line += f"{COLOR_ENTRY} S {RESET}"
             elif [j, i] == EXIT:
                 middle_line += f"{COLOR_EXIT} F {RESET}"
-            elif [j, i] in path_coords:
-                    middle_line += f"-+-"
+            elif show_path and [j, i] in path_coords:
+                middle_line += "-+-"
+            elif is_solid:
+                middle_line += f"{COLOR_42}   {RESET}"
             else:
-                if is_solid:
-                    middle_line += f"{COLOR_42}   {RESET}"    
-                else:
-                    middle_line += "   "
-        middle_line += f"\033[1m{COLOR_WALL}│{RESET}"
+                middle_line += "   "
+        middle_line += f"\033[1m{color_wall}│{RESET}"
         print(middle_line)
 
         bottom_line = ""
@@ -94,12 +108,10 @@ def representation(maze: list[list[list[int]]], config: dict[str, str], route: s
             if is_solid:
                 bottom_line += f"{COLOR_42}   {RESET}"
             else:
-                bottom_line += f"\033[1m{COLOR_WALL}───{RESET}" if cell[1] else "   "
+                bottom_line += (
+                    f"\033[1m{color_wall}───{RESET}"
+                    if cell[1]
+                    else "   "
+                )
         bottom_line += f"{COLOR_CORNER}+{RESET}"
         print(bottom_line)
-
-
-
-
-
-
