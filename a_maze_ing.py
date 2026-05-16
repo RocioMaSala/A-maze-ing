@@ -205,10 +205,12 @@ def menu(
         None
     """
     show_path = False
-    color_index = 0
+    wall_index = 0
+    path_index = 1
     current_maze, current_route = next(generate)
     color_wall = "\033[32m"
-    representation(current_maze, config, current_route, show_path, color_wall)
+    color_path = "\033[33m"
+    representation(current_maze, config, current_route, show_path, color_wall, color_path)
 
     while True:
         print("== A-Maze-ing ===")
@@ -225,13 +227,13 @@ def menu(
         if option == "1":
             current_maze, current_route = next(generate)
             representation(
-                current_maze, config, current_route, show_path, color_wall
+                current_maze, config, current_route, show_path, color_wall, color_path
             )
 
         elif option == "2":
             show_path = not show_path
             representation(
-                current_maze, config, current_route, show_path, color_wall
+                current_maze, config, current_route, show_path, color_wall, color_path
             )
 
         elif option == "3":
@@ -243,12 +245,12 @@ def menu(
                 "\033[38;2;255;105;180m"
             ]
             print("Let's rotate the colors")
-            color_wall = COLORS[color_index]
-            color_index += 1
-            if color_index >= len(COLORS):
-                color_index = 0
+            color_wall = COLORS[wall_index]
+            color_path = COLORS[path_index]
+            wall_index = (wall_index + 1) % len(COLORS)
+            path_index = (path_index + 1) % len(COLORS)
             representation(
-                current_maze, config, current_route, show_path, color_wall
+                current_maze, config, current_route, show_path, color_wall, color_path
             )
 
         elif option == "4":

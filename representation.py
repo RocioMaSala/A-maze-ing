@@ -19,6 +19,7 @@ def coordinates_path(route: str) -> list[tuple[int, int]]:
         corresponding to the given route.
     """
     directions = []
+    index = 0
     for x in route:
         if x == "N":
             directions.append((0, -1))
@@ -28,13 +29,37 @@ def coordinates_path(route: str) -> list[tuple[int, int]]:
             directions.append((1, 0))
         elif x == "W":
             directions.append((-1, 0))
+        index += 1
     return (directions)
+
+
+def get_path_char(prev: tuple[int, int] | None, next: tuple[int, int] | None) -> str:
+    if next is None and next is not None:
+        return " | " if next in [(0, -1), (0, 1)] else "───"
+    if next is None and prev is not None:
+        return " | " if prev in [(0, -1), (0, 1)] else "───"
+    if next is None or next is None:
+        return " # "
+    if prev in [(0, -1), (0, 1)] and next in [(0, -1), (0, 1)]:
+        return " | "
+    if prev in [(1, 0), (-1, 0)] and next in [(1, 0), (-1, 0)]:
+        return "───"
+    if (prev == (-1, 0) or next == (1, 0)) and (prev == (0 , 1) or next == (0, -1)):
+        return " └─"
+    if (prev == (1, 0) or next == (-1, 0)) and (prev == (0, 1) or next == (0, -1)):
+        return "─┘ "
+    if (prev == (-1, 0) or next == (1, 0)) and (prev == (0, -1) or next == (0, 1)):
+        return " ┌─"
+    if (prev == (1, 0) or next == (-1, 0)) and (prev == (0, -1) or next == (0, 1)):
+        return "─┐ "
+    return " * "
 
 
 def representation(
         maze: list[list[list[int]]],
         config: dict[str, str],
-        route: str, show_path: bool, color_wall: str
+        route: str, show_path: bool, color_wall: str, 
+        color_path: str
         ) -> None:
     """
     Display a graphical representation of the maze in the terminal.
@@ -77,6 +102,18 @@ def representation(
         current_y += dy
         path_coords.append([current_x, current_y])
 
+    path_directions: dict[tuple, tuple] = {}
+    for i, coord in enumerate(path_coords):
+        if i > 0:
+            prev_dir = steps[i-1]
+        else:
+            prev_dir = None
+        if i < len(steps):
+            next_dir = steps[i] 
+        else:
+            next_dir = None
+        path_directions[tuple(coord)] = (prev_dir, next_dir)
+    
     top_line = ""
     for cell in maze[0]:
         top_line += f"{COLOR_CORNER}+{RESET}"
@@ -95,7 +132,9 @@ def representation(
             elif [j, i] == EXIT:
                 middle_line += f"{COLOR_EXIT} F {RESET}"
             elif show_path and [j, i] in path_coords:
-                middle_line += " # "
+                prev_dir, next_dir = path_directions.get(tuple([j, i]), (None, None))
+                path_char = get_path_char(prev_dir, next_dir)
+                middle_line += f"{color_path}{path_char}{RESET}"
             elif is_solid:
                 middle_line += f"{COLOR_42}   {RESET}"
             else:
