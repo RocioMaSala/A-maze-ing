@@ -33,7 +33,8 @@ def coordinates_path(route: str) -> list[tuple[int, int]]:
     return (directions)
 
 
-def get_path_char(prev: tuple[int, int] | None, next: tuple[int, int] | None) -> str:
+def get_path_char(prev: tuple[int, int],
+                  next: tuple[int, int]) -> str:
     if next is None and next is not None:
         return " | " if next in [(0, -1), (0, 1)] else "───"
     if next is None and prev is not None:
