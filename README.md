@@ -35,13 +35,17 @@ The generated mazes guarantee connectivity between the start and the exit while 
 
 ## Compilation
 
-Compile the project using: make run
+Compile the project using: make
+
+Install dependencies: make install
+
+Debug the project: make debug
 
 Clean object files: make clean
 
-Remove all generated files: make fclean
+Check for flake8 and mypy errors: make lint
 
-Rebuild the project: make re
+Check for flake8 and mypy --strict: make lint-strict
 
 # Configuration File Structure
 
@@ -57,17 +61,15 @@ Example:
 | START_Y | Starting Y coordinate |
 | END_X | Exit X coordinate |
 | END_Y | Exit Y coordinate |
-| SEED | Random generation seed |
 
 # Maze Generation Algorithm
 ## Chosen Algorithm
 
-This project uses the Recursive Backtracking Algorithm for maze generation.
+This project uses the Recursive Backtracking Algorithm for maze generation, called Depth First Search (DFS).
 
 ## How it works
 1. Start from an initial cell.
 2. Randomly select an unvisited neighboring cell.
-
 3. Remove the wall between both cells.
 4. Continue recursively from the new cell.
 5. Backtrack when no unvisited neighbors remain.
@@ -85,10 +87,26 @@ We selected recursive backtracking because:
 
 Additionally, it offers good performance for medium-sized mazes while remaining easy to maintain and extend.
 
-# Reusable Code
+# Reusable Module: mazegen
 
-Several parts of the project were designed to be reusable: ???????????????????????????????????
+## How to Rebuild the Package From Source
 
+To verify the build process in a clean environment (virtualenv or venv), run the following commands from the root of the repository:
+
+1. python3 -m venv venv
+2. source venv/bin/activate
+3. pip install --upgrade pip build
+4. python3 -m build
+
+
+*The mazegen package exposes the MazeGenerator class, allowing you to customize, generate, and extract maze structures along with their solutions.*
+
+
+## Basic Usage & Instantiation
+
+Install locally the Package:
+
+pip install dist/mazegen_romarti2dtaylor--1.0.0-py3-none-any.whl
 
 # Team & Project Management
 ## Team Roles

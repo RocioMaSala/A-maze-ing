@@ -1,5 +1,5 @@
 import sys
-from maze_generator import MazeGenerator
+from mazegen.maze_generator import MazeGenerator
 from typing import Generator
 from random import seed
 from representation import representation
@@ -9,6 +9,7 @@ class UsageError(Exception):
     """
     Exception raised when the program is executed with invalid arguments.
     """
+
     def __init__(self, message: str = "Usage Error: python3 a_maze_ing.py "
                  "config.txt") -> None:
         """
@@ -27,6 +28,7 @@ class EntryExitError(Exception):
     """
     Exception raised when entry and exit coordinates are identical.
     """
+
     def __init__(self, message: str = "Entry Exit Error: Entry and exit "
                  "points need to be in different positions.") -> None:
         """
@@ -45,6 +47,7 @@ class ConfigSyntaxError(Exception):
     """
     Exception raised when the configuration file syntax is invalid.
     """
+
     def __init__(self, message: str = "Invalid config file syntax.") -> None:
         """
         Initialize the exception with a custom error message.
@@ -62,6 +65,7 @@ class EntryError(Exception):
     """
     Exception raised when entry coordinates are outside maze boundaries.
     """
+
     def __init__(self, message: str = "Entry coordinates must be within maze"
                  " boundaries.") -> None:
         """
@@ -80,6 +84,7 @@ class ExitError(Exception):
     """
     Exception raised when exit coordinates are outside maze boundaries.
     """
+
     def __init__(self, message: str = "Exit coordinates must be within maze"
                  " boundaries.") -> None:
         """
@@ -91,6 +96,28 @@ class ExitError(Exception):
         Returns:
             None
         """
+        super().__init__(message)
+
+
+class SizeError(Exception):
+    def __init__(self, message: str = "To show the 42, the maze must be "
+                 "larger than 7x5") -> None:
+        super().__init__(message)
+
+
+class MissingConfigKeyError(Exception):
+    """
+    Exception raised when a required key is missing from the configuration file.
+    """
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+
+
+class ConfigValueError(Exception):
+    """
+    Exception raised when a configuration key has an invalid value type.
+    """
+    def __init__(self, message: str) -> None:
         super().__init__(message)
 
 
@@ -128,7 +155,7 @@ def random_generator(
         tuple[list[list[list[int]]], str],
         None,
         None
-    ]:
+]:
     """
     Generate mazes indefinitely using different random seeds.
 
@@ -136,7 +163,8 @@ def random_generator(
         config (dict[str, str]): Maze configuration settings.
 
     Returns:
-        Generator[list[list[list[int]]], str], None, None]: Generator yielding tuples
+        Generator[list[list[list[int]]], str], None, None]: Generator
+        yielding tuples
         containing a maze and its corresponding route.
     """
 
@@ -149,13 +177,32 @@ def random_generator(
         yield maze, route
 
 
+def is_in_42(config: dict[str, str]) -> None:
+    vis = [[False for i in range(int(config["WIDTH"]))]
+           for j in range(int(config["HEIGHT"]))]
+    y = round((len(vis) - 5) / 2)
+    x = round((len(vis[0]) - 7) / 2)
+
+    entry_x, entry_y = tuple(int(x) for x in config["ENTRY"].split(","))
+    exit_x, exit_y = tuple(int(x) for x in config["EXIT"].split(","))
+
+    targets = [
+        (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 3), (2, 4),
+        (4, 0), (5, 0), (6, 0), (6, 1), (6, 2), (5, 2), (4, 2),
+        (4, 3), (4, 4), (5, 4), (6, 4)
+    ]
+    if (entry_x - x, entry_y - y) in targets:
+        raise EntryExitError("Entry Exit Error: Entry and exits cannot be "
+                             "inside the 42 drawing")
+
+
 def menu(
-        generate: Generator[
-            tuple[list[list[list[int]]], str],
-            None, None
-        ],
-        config: dict[str, str]
-    ) -> None:
+    generate: Generator[
+        tuple[list[list[list[int]]], str],
+        None, None
+    ],
+    config: dict[str, str]
+) -> None:
     """
     Display and manage the interactive maze menu.
 
@@ -174,9 +221,12 @@ def menu(
         None
     """
     show_path = False
+    wall_index = 0
+    path_index = 1
     current_maze, current_route = next(generate)
     color_wall = "\033[32m"
-    representation(current_maze, config, current_route, show_path, color_wall)
+    color_path = "\033[33m"
+    representation(current_maze, config, current_route, show_path, color_wall, color_path)
 
     while True:
         print("== A-Maze-ing ===")
@@ -193,31 +243,31 @@ def menu(
         if option == "1":
             current_maze, current_route = next(generate)
             representation(
-                current_maze, config, current_route, show_path, color_wall
-                )
+                current_maze, config, current_route, show_path, color_wall, color_path
+            )
 
         elif option == "2":
             show_path = not show_path
             representation(
-                current_maze, config, current_route, show_path, color_wall
-                )
+                current_maze, config, current_route, show_path, color_wall, color_path
+            )
 
         elif option == "3":
-            COLORS = {
-                    "blue": "\033[34m",
-                    "red": "\033[31m",
-                    "green": "\033[32m",
-                    "yellow": "\033[33m",
-                    "pink": "\033[38;2;255;105;180m"
-                }
+            COLORS = [
+                "\033[34m",
+                "\033[31m",
+                "\033[32m",
+                "\033[33m",
+                "\033[38;2;255;105;180m"
+            ]
             print("Let's rotate the colors")
-            color = input(
-                "What color do you prefer?(blue, red, green, yellow, pink): "
-                ).strip().lower()
-            color_wall = COLORS[color]
+            color_wall = COLORS[wall_index]
+            color_path = COLORS[path_index]
+            wall_index = (wall_index + 1) % len(COLORS)
+            path_index = (path_index + 1) % len(COLORS)
             representation(
-                current_maze, config, current_route, show_path, color_wall
-                )
+                current_maze, config, current_route, show_path, color_wall, color_path
+            )
 
         elif option == "4":
             print("Thank you! Bye Bye")
@@ -252,6 +302,17 @@ def main() -> None:
             config = {key.strip(): value.strip() for key, value in
                       (parse_config_line(line) for line in file if
                        line.strip())}
+        REQUIRED_KEYS = {"WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE", "PERFECT"}
+        missing_keys = [req_key for req_key in REQUIRED_KEYS if req_key not in config]
+        if missing_keys:
+            raise MissingConfigKeyError(
+                f"Config Error: Missing required keys: {', '.join(missing_keys)}"
+            )
+        if config["PERFECT"] not in ("True", "False"):
+            raise ConfigValueError(
+                f"Config Error: Invalid value for 'PERFECT'. "
+                f"Expected 'True' or 'False', got '{config['PERFECT']}'."
+            )
         if config["ENTRY"] == config["EXIT"]:
             raise EntryExitError
         ENTRY = [int(x) for x in config["ENTRY"].split(",")]
@@ -262,17 +323,30 @@ def main() -> None:
         if EXIT[0] > int(config["WIDTH"]) or EXIT[0] < 0 or EXIT[1] > int(
                 config["HEIGHT"]) or EXIT[1] < 0:
             raise ExitError
+        if int(config["WIDTH"]) > 7 and int(config["HEIGHT"]) > 5:
+            is_in_42(config)
+        if int(config["WIDTH"]) <= 7 or int(config["HEIGHT"]) <= 5:
+            raise SizeError
         generate = random_generator(config)
         menu(generate, config)
+
     except UsageError as e:
         print(e)
     except FileNotFoundError:
         print("config.txt file not present")
     except EntryExitError as e:
         print(e)
+    except MissingConfigKeyError as e:
+        print(e)
+    except ConfigValueError as e:
+        print(e)
     except EntryError as e:
         print(e)
     except ExitError as e:
+        print(e)
+    except SizeError as e:
+        print(e)
+    except ValueError as e:
         print(e)
 
 
