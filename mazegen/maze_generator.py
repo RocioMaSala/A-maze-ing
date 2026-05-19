@@ -5,24 +5,27 @@ from queue import Queue
 class MazeGenerator:
     """
     A manager class responsible for generating and solving customized mazes.
-    
-    Supports depth-first search generation, custom structural layouts (such as 
-    embedding an easter-egg shape), loop-injection for imperfect mazes, and 
+
+    Supports depth-first search generation, custom structural layouts (such as
+    embedding an easter-egg shape), loop-injection for imperfect mazes, and
     breadth-first search pathfinding.
     """
+
     def generate_maze(self, config: dict[str, str]) -> tuple:
         """
-        Generate a maze grid and find its solution pathway based on a configuration layout.
+        Generate a maze grid and find its solution pathway based on a
+        configuration layout.
 
         Parameters:
-        config (dict[str, str]): Configuration settings containing string values for 
-            'HEIGHT', 'WIDTH', 'PERFECT', 'OUTPUT_FILE', 'ENTRY', and 'EXIT'.
+        config (dict[str, str]): Configuration settings containing string
+                                 values for 'HEIGHT', 'WIDTH', 'PERFECT',
+                                 'OUTPUT_FILE', 'ENTRY', and 'EXIT'.
 
         Returns:
         tuple: A tuple containing:
             - maze (list[list[list[int]]]): The generated 3D maze grid array.
-            - route (str): The string sequence of directions ('N', 'E', 'S', 'W') 
-              representing the solved path.
+            - route (str): The string sequence of directions
+              ('N', 'E', 'S', 'W') representing the solved path.
         """
         height = int(config["HEIGHT"])
         width = int(config["WIDTH"])
@@ -54,7 +57,8 @@ class MazeGenerator:
         width (int): The total width boundary of the maze grid.
 
         Returns:
-        bool: True if the cell is inside boundaries and has not been visited, False otherwise.
+        bool: True if the cell is inside boundaries and has not been visited,
+              False otherwise.
         """
         if (row >= 0 and col >= 0 and row < height and col < width
                 and vis[row][col] is False):
@@ -63,14 +67,16 @@ class MazeGenerator:
 
     def get_direction(self, drow: int, dcol: int) -> str:
         """
-        Convert a coordinate delta movement vector into a cardinal direction character string.
+        Convert a coordinate delta movement vector into a cardinal direction
+        character string.
 
         Parameters:
         drow (int): Row offset value (-1, 0, or 1).
         dcol (int): Column offset value (-1, 0, or 1).
 
         Returns:
-        str: A single character ('N', 'E', 'S', or 'W') corresponding to the vector.
+        str: A single character ('N', 'E', 'S', or 'W') corresponding to the
+             vector.
         """
         if dcol == 0 and drow == -1:
             return "N"
@@ -84,14 +90,18 @@ class MazeGenerator:
     def open_wall(self, maze: list[list[list[int]]], curr: tuple[int, int],
                   row: int, col: int, direction: str) -> None:
         """
-        Carve an opening through a wall between two adjacent cells in the maze matrix.
+        Carve an opening through a wall between two adjacent cells in the maze
+        matrix.
 
         Parameters:
-        maze (list[list[list[int]]]): The 3D matrix representing the maze framework.
-        curr (tuple[int, int]): Coordinates (row, col) of the current origin cell.
+        maze (list[list[list[int]]]): The 3D matrix representing the maze
+                                      framework.
+        curr (tuple[int, int]): Coordinates (row, col) of the current origin
+                                cell.
         row (int): Row index of the target neighboring cell.
         col (int): Column index of the target neighboring cell.
-        direction (str): Cardinal direction string ('N', 'E', 'S', or 'W') leading out of curr.
+        direction (str): Cardinal direction string ('N', 'E', 'S', or 'W')
+                         leading out of curr.
 
         Returns:
         None
@@ -112,10 +122,12 @@ class MazeGenerator:
     def dfs_rec(self, maze: list[list[list[int]]], vis: list[list[bool]],
                 height: int, width: int, row: int, col: int) -> None:
         """
-        Generate a maze structure recursively utilizing a Randomized Depth-First Search.
+        Generate a maze structure recursively utilizing a Randomized
+        Depth-First Search.
 
         Parameters:
-        maze (list[list[list[int]]]): The 3D matrix tracking structural cell walls.
+        maze (list[list[list[int]]]): The 3D matrix tracking structural cell
+                                      walls.
         vis (list[list[bool]]): 2D matrix tracking visited coordinates.
         height (int): Total height boundary of the maze grid.
         width (int): Total width boundary of the maze grid.
@@ -142,13 +154,16 @@ class MazeGenerator:
 
     def bin_to_hex(self, bin: list[int]) -> str:
         """
-        Convert a 4-bit wall representation list into its hexadecimal string equivalent.
+        Convert a 4-bit wall representation list into its hexadecimal string
+        equivalent.
 
         Parameters:
-        bin (list[int]): A list containing four binary integers [W, S, E, N] where 1 is wall, 0 is path.
+        bin (list[int]): A list containing four binary integers [W, S, E, N]
+                         where 1 is wall, 0 is path.
 
         Returns:
-        str: Hexadecimal string prefixed with '0x' representing the decimal value of the bits.
+        str: Hexadecimal string prefixed with '0x' representing the decimal
+             value of the bits.
         """
         dec = 1 * bin[3] + 2 * bin[2] + 4 * bin[1] + 8 * bin[0]
         hexa = hex(dec)
@@ -157,12 +172,14 @@ class MazeGenerator:
     def output_file(self, maze: list[list[list[int]]],
                     config: dict[str, str]) -> None:
         """
-        Serialize the maze architecture matrix and configuration points to an external file.
+        Serialize the maze architecture matrix and configuration points to an
+        external file.
 
         Parameters:
-        maze (list[list[list[int]]]): The 3D array layout tracking the maze grid.
-        config (dict[str, str]): Configuration tracking metadata values including 'OUTPUT_FILE', 
-            'ENTRY', and 'EXIT'.
+        maze (list[list[list[int]]]): The 3D array layout tracking the maze
+                                      grid.
+        config (dict[str, str]): Configuration tracking metadata values
+                                 including 'OUTPUT_FILE', 'ENTRY', and 'EXIT'.
 
         Returns:
         None
@@ -177,10 +194,12 @@ class MazeGenerator:
 
     def draw_42(self, vis: list[list[bool]]) -> None:
         """
-        Carve out an unvisitable mask block mimicking the shape of the number '42' in the center grid.
+        Carve out an unvisitable mask block mimicking the shape of the number
+        '42' in the center grid.
 
         Parameters:
-        vis (list[list[bool]]): 2D matrix tracking visited states to be modified.
+        vis (list[list[bool]]): 2D matrix tracking visited states to be
+                                modified.
 
         Returns:
         None
@@ -210,17 +229,22 @@ class MazeGenerator:
                         curr: tuple[int, ...], next: tuple[int, int],
                         direction: str) -> bool:
         """
-        Check if a corridor layout allows transition through shared borders without wall interference.
+        Check if a corridor layout allows transition through shared borders
+        without wall interference.
 
         Parameters:
-        maze (list[list[list[int]]]): The 3D matrix representing the maze map layout.
-        curr (tuple[int, ...]): Spatial tuple indexes (row, col) of the current origin cell.
-        next (tuple[int, int]): Spatial tuple indexes (row, col) of the targeted neighbor cell.
-        direction (str): The direction vector key string ('N', 'E', 'S', 'W') connecting both nodes.
+        maze (list[list[list[int]]]): The 3D matrix representing the maze map
+                                      layout.
+        curr (tuple[int, ...]): Spatial tuple indexes (row, col) of the
+                                current origin cell.
+        next (tuple[int, int]): Spatial tuple indexes (row, col) of the
+                                targeted neighbor cell.
+        direction (str): The direction vector key string ('N', 'E', 'S', 'W')
+                         connecting both nodes.
 
         Returns:
-        bool: True if both cells have mutual open space connections (zeros) at the border index, 
-            False otherwise.
+        bool: True if both cells have mutual open space connections (zeros) at
+              the border index, False otherwise.
         """
         if direction == "N" and maze[curr[0]][curr[1]][3] == 0 and maze[
                 next[0]][next[1]][1] == 0:
@@ -240,20 +264,26 @@ class MazeGenerator:
                      vis: list[list[bool]], height: int, width: int,
                      direction: str, maze: list[list[list[int]]]) -> bool:
         """
-        Validate if an unvisited neighboring cell can be transitioned into during BFS execution.
+        Validate if an unvisited neighboring cell can be transitioned into
+        during BFS execution.
 
         Parameters:
-        next (tuple[int, int]): Index tuple (row, col) representing the destination grid coordinates.
-        curr (tuple[int, ...]): Index tuple (row, col) representing the source grid coordinates.
-        vis (list[list[bool]]): 2D matrix tracking visited locations during runtime.
+        next (tuple[int, int]): Index tuple (row, col) representing the
+                                destination grid coordinates.
+        curr (tuple[int, ...]): Index tuple (row, col) representing the source
+                                grid coordinates.
+        vis (list[list[bool]]): 2D matrix tracking visited locations during
+                                runtime.
         height (int): Total row array ceiling height boundary value.
         width (int): Total column array frame width boundary value.
-        direction (str): Cardinal tracking identification string map key ('N', 'E', 'S', 'W').
-        maze (list[list[list[int]]]): Core 3D configuration data layout mapping walls.
+        direction (str): Cardinal tracking identification string map key
+                         ('N', 'E', 'S', 'W').
+        maze (list[list[list[int]]]): Core 3D configuration data layout
+                                      mapping walls.
 
         Returns:
-        bool: True if the adjacent space resides within the map parameters, remains unvisited, 
-            and has open paths.
+        bool: True if the adjacent space resides within the map parameters,
+              remains unvisited, and has open paths.
         """
         if (next[0] >= 0 and next[1] >= 0 and next[0] < height and
             next[1] < width and vis[next[0]][next[1]] is False and
@@ -264,17 +294,19 @@ class MazeGenerator:
     def bfs(self, maze: list[list[list[int]]], config: dict[str, str],
             vis: list[list[bool]]) -> str:
         """
-        Calculate the shortest path solution across a maze via Breadth-First Search traversal.
+        Calculate the shortest path solution across a maze via Breadth-First
+        Search traversal.
 
         Parameters:
-        maze (list[list[list[int]]]): Multi-dimensional tracking database map matching wall bits.
-        config (dict[str, str]): Setup variables providing keys 'ENTRY', 'EXIT', 'HEIGHT', 'WIDTH', 
-            and 'OUTPUT_FILE'.
+        maze (list[list[list[int]]]): Multi-dimensional tracking database map
+                                      matching wall bits.
+        config (dict[str, str]): Setup variables providing keys 'ENTRY',
+                                 'EXIT', 'HEIGHT', 'WIDTH', and 'OUTPUT_FILE'.
         vis (list[list[bool]]): 2D configuration grid reflecting visited cells.
 
         Returns:
-        str: Formatted string processing directions (e.g., 'EESNW') representing the solution, 
-            or empty string if unreachable.
+        str: Formatted string processing directions (e.g., 'EESNW')
+             representing the solution, or empty string if unreachable.
         """
         directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
         entry_rev = tuple(int(x) for x in config["ENTRY"].split(","))
@@ -315,15 +347,20 @@ class MazeGenerator:
     def is_wall(self, curr_cell: list[int], next_cell: list[int],
                 direction: tuple[int, int]) -> bool:
         """
-        Verify if an obstacle blocking passage exists between two targeted coordinates.
+        Verify if an obstacle blocking passage exists between two targeted
+        coordinates.
 
         Parameters:
-        curr_cell (list[int]): Binary wall list properties tracking the origin index space.
-        next_cell (list[int]): Binary wall list properties tracking the recipient index space.
-        direction (tuple[int, int]): A step representation vector tracking delta offsets (drow, dcol).
+        curr_cell (list[int]): Binary wall list properties tracking the origin
+                               index space.
+        next_cell (list[int]): Binary wall list properties tracking the
+                               recipient index space.
+        direction (tuple[int, int]): A step representation vector tracking
+                                     delta offsets (drow, dcol).
 
         Returns:
-        bool: True if a wall is actively established between the specified borders, False otherwise.
+        bool: True if a wall is actively established between the specified
+              borders, False otherwise.
         """
         dir_str = self.get_direction(direction[0], direction[1])
         if dir_str == "N":
@@ -349,7 +386,8 @@ class MazeGenerator:
         maze (list[list[list[int]]]): Target matrix where adjustments occur.
         x (int): Horizontal spatial column indicator.
         y (int): Vertical spatial row indicator.
-        dir (tuple[int, int]): Direction representation vector tracking (drow, dcol).
+        dir (tuple[int, int]): Direction representation vector tracking
+                               (drow, dcol).
 
         Returns:
         None
@@ -377,7 +415,8 @@ class MazeGenerator:
         maze (list[list[list[int]]]): Target matrix where adjustments occur.
         x (int): Horizontal spatial column indicator.
         y (int): Vertical spatial row indicator.
-        dir (tuple[int, int]): Direction representation vector tracking (drow, dcol).
+        dir (tuple[int, int]): Direction representation vector tracking
+                               (drow, dcol).
 
         Returns:
         None
@@ -399,7 +438,8 @@ class MazeGenerator:
     def is_in_42(self, height: int, width: int, cell_x: int,
                  cell_y: int) -> bool:
         """
-        Identify whether a specific coordinate falls inside the bounds of the '42' mask.
+        Identify whether a specific coordinate falls inside the bounds of the
+        '42' mask.
 
         Parameters:
         height (int): Maze framework height limitation scale.
@@ -408,7 +448,8 @@ class MazeGenerator:
         cell_y (int): Targeted row testing value coordinate.
 
         Returns:
-        bool: True if the coordinates coincide inside the masked area boundaries, False otherwise.
+        bool: True if the coordinates coincide inside the masked area
+              boundaries, False otherwise.
         """
         y = round((height - 5) / 2)
         x = round((width - 7) / 2)
@@ -429,22 +470,25 @@ class MazeGenerator:
                                 y: int, dir: tuple[int, int],
                                 height: int, width: int) -> bool:
         """
-        Determine if knocking down a wall creates a wide open space larger than standard corridors.
+        Determine if knocking down a wall creates a wide open space larger
+        than standard corridors.
 
-        This functions by test-removing a wall, inspecting if an unbroken 2x2 clear space loop 
-        is introduced, and then reconstructing the wall configuration before returning.
+        This functions by test-removing a wall, inspecting if an unbroken 2x2
+        clear space loop is introduced, and then reconstructing the wall
+        configuration before returning.
 
         Parameters:
         maze (list[list[list[int]]]): Main 3D tracking map matrix structure.
         x (int): Horizontal cell column axis component.
         y (int): Vertical cell row axis component.
-        dir (tuple[int, int]): Traversal step trajectory configuration array mapping (drow, dcol).
+        dir (tuple[int, int]): Traversal step trajectory configuration array
+                               mapping (drow, dcol).
         height (int): Total height limits constraint index parameter.
         width (int): Total width limits constraint index parameter.
 
         Returns:
-        bool: True if removing the wall violates corridor design by constructing an open 2x2 grid, 
-            False otherwise.
+        bool: True if removing the wall violates corridor design by
+              constructing an open 2x2 grid, False otherwise.
         """
         self.remove_wall(maze, x, y, dir)
         ny, nx = y + dir[0], x + dir[1]
@@ -470,16 +514,19 @@ class MazeGenerator:
     def imperfect_maze(self, maze: list[list[list[int]]],
                        config: dict[str, str], vis: list[list[bool]]) -> str:
         """
-        Inject alternative pathways and loops into a maze by randomly knocking down non-critical walls.
+        Inject alternative pathways and loops into a maze by randomly knocking
+        down non-critical walls.
 
         Parameters:
-        maze (list[list[list[int]]]): Core multi-dimensional list tracking structural configurations.
-        config (dict[str, str]): Setup parameters configuration map providing dimension settings 
-            and exit coordinates.
+        maze (list[list[list[int]]]): Core multi-dimensional list tracking
+                                      structural configurations.
+        config (dict[str, str]): Setup parameters configuration map providing
+                                 dimension settings and exit coordinates.
         vis (list[list[bool]]): 2D tracking system tracking visited items.
 
         Returns:
-        str: Route character map matching the shortest solution path calculated over the modified grid.
+        str: Route character map matching the shortest solution path
+             calculated over the modified grid.
         """
         directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
         height = int(config["HEIGHT"])

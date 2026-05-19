@@ -36,7 +36,7 @@ def coordinates_path(route: str) -> list[tuple[int, int]]:
 def get_path_char(prev: tuple[int, int], next: tuple[int, int]) -> str:
     """Determine the ASCII character to represent a path segment.
 
-    Selects a box-drawing character (e.g., straight line or turn) based on 
+    Selects a box-drawing character (e.g., straight line or turn) based on
     the incoming (prev) and outgoing (next) movement directions.
 
     Args:
@@ -44,7 +44,7 @@ def get_path_char(prev: tuple[int, int], next: tuple[int, int]) -> str:
         next (tuple[int, int]): The subsequent movement vector, or None.
 
     Returns:
-        str: A 3-character string containing the visual representation of 
+        str: A 3-character string containing the visual representation of
             the path segment.
     """
     if next is None and next is not None:

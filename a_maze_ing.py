@@ -103,6 +103,7 @@ class SizeError(Exception):
     """
     Exception raised when the maze dimensions are too small to render '42'.
     """
+
     def __init__(self, message: str = "To show the 42, the maze must be "
                  "larger than 7x5") -> None:
         """
@@ -119,6 +120,7 @@ class MissingConfigKeyError(Exception):
     Exception raised when a required key
     is missing from the configuration file.
     """
+
     def __init__(self, message: str) -> None:
         super().__init__(message)
 
@@ -127,6 +129,7 @@ class ConfigValueError(Exception):
     """
     Exception raised when a configuration key has an invalid value type.
     """
+
     def __init__(self, message: str) -> None:
         """Initialize the exception with a custom error message.
 
@@ -194,13 +197,14 @@ def random_generator(
 
 def is_in_42(config: dict[str, str]) -> None:
     """
-    Verify if the entry or exit points fall inside the '42' text drawing layout.
+    Verify if the entry or exit points fall inside the '42' text drawing
+    layout.
 
     Args:
         config (dict[str, str]): Maze configuration settings.
 
     Raises:
-        EntryExitError: If the entry or exit coordinates overlap with the 
+        EntryExitError: If the entry or exit coordinates overlap with the
         predefined '42' coordinate masks.
     """
     vis = [[False for i in range(int(config["WIDTH"]))]
@@ -253,7 +257,7 @@ def menu(
     color_path = "\033[33m"
     representation(
         current_maze, config, current_route, show_path, color_wall, color_path
-        )
+    )
 
     while True:
         print("== A-Maze-ing ===")
@@ -330,17 +334,20 @@ def main() -> None:
         None
 
     Raises:
-        UsageError: If the number of command-line arguments is incorrect 
+        UsageError: If the number of command-line arguments is incorrect
             or the configuration file name is not 'config.txt'.
         FileNotFoundError: If the specified configuration file does not exist.
-        MissingConfigKeyError: If any of the required keys (WIDTH, HEIGHT, 
-            ENTRY, EXIT, OUTPUT_FILE, PERFECT) are missing from the configuration file.
-        ConfigValueError: If the 'PERFECT' key has a value other than 'True' or 'False'.
+        MissingConfigKeyError: If any of the required keys (WIDTH, HEIGHT,
+            ENTRY, EXIT, OUTPUT_FILE, PERFECT) are missing from the
+            configuration file.
+        ConfigValueError: If the 'PERFECT' key has a value other than 'True'
+        or 'False'.
         EntryExitError: If the entry and exit coordinates are identical.
         EntryError: If the entry coordinates are out of the maze boundaries.
         ExitError: If the exit coordinates are out of the maze boundaries.
-        SizeError: If the maze dimensions are 7 or less for width, or 5 or less for height.
-        ValueError: If there is an error converting coordinate or dimension 
+        SizeError: If the maze dimensions are 7 or less for width, or 5 or
+        less for height.
+        ValueError: If there is an error converting coordinate or dimension
             strings into integers.
     """
     try:
@@ -359,10 +366,10 @@ def main() -> None:
             "EXIT",
             "OUTPUT_FILE",
             "PERFECT"
-            }
+        }
         missing_keys = [
             req_key for req_key in REQUIRED_KEYS if req_key not in config
-            ]
+        ]
         if missing_keys:
             keys_str = ', '.join(missing_keys)
             msg = f"Config Error: Missing required keys:{keys_str}"
