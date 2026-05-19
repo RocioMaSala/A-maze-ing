@@ -7,7 +7,7 @@ SRC = a_maze_ing.py mazegen/maze_generator.py representation.py
 
 .PHONY: all install build run debug clean lint
 
-all: install build run
+all: install run
 
 install:
 	python3 -m venv venv
@@ -25,7 +25,7 @@ run:
 
 debug:
 	@echo "Running in debug mode..."
-	$(PYTHON) -m pytest -v
+	$(PYTHON) -m pdb a_maze_ing.py config.txt
 	
 clean:
 	@echo "Cleaning temporary files..."
