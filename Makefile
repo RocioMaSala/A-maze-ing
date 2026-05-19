@@ -1,22 +1,11 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: romarti2 <romarti2@student.42madrid.com    +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2026/03/02 17:55:29 by romarti2          #+#    #+#              #
-#    Updated: 2026/05/18 18:38:25 by romarti2         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
 NAME = a_maze_ing
 PIP := ./venv/bin/pip
 PYTHON := ./venv/bin/python3
 
-REQS = requirements.txt # Mirar esto, poner liberias si usamos
+REQS = requirements.txt
+SRC = a_maze_ing.py mazegen/maze_generator.py representation.py
 
-SRC = a_maze_ing.py maze_generator.py representation.py
+.PHONY: all install build run debug clean lint
 
 all: install build run
 
@@ -27,16 +16,16 @@ install:
 	@if [ -f $(REQS) ]; then $(PIP) install -r $(REQS); else echo "No requirements.txt found, skipping."; fi
 
 build:
-	. ./venv/bin/activate && $(PYTHON) -m build
+	$(PYTHON) -m build
 
 
 run:
 	@echo "Running the project..."
-	. ./venv/bin/activate && $(PYTHON) a_maze_ing.py config.txt
+	$(PYTHON) a_maze_ing.py config.txt
 
 debug:
 	@echo "Running in debug mode..."
-	. ./venv/bin/activate && $(PYTHON) -m pytest -v
+	$(PYTHON) -m pytest -v
 	
 clean:
 	@echo "Cleaning temporary files..."
@@ -49,14 +38,13 @@ clean:
 
 
 lint:
-	@echo "Running lint checks..."
-	-flake8 *.py */*.py 
-	mypy *.py */*.py \
+	$(PYTHON) -m flake8 $(SRC)
+	$(PYTHON) -m mypy $(SRC) \
 	--warn-return-any \
 	--warn-unused-ignores \
 	--ignore-missing-imports \
 	--disallow-untyped-defs \
-	--check-untyped-defs \
+	--check-untyped-defs
 
 
-.PHONY: all install build run debug clean lint build
+
