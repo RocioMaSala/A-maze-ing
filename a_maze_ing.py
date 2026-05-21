@@ -311,8 +311,10 @@ def main() -> None:
         print(e)
     except ConfigSyntaxError as e:
         print(e)
-    except ValueError as e:
-        print(e)
+    except ValueError:
+        print(
+            "ValueError: Entry and exit coordinates must only contain numbers"
+        )
     except MazeError:
         return
 

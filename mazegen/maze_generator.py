@@ -144,9 +144,14 @@ class MazeGenerator:
 
             if int(config["WIDTH"]) > 7 and int(config["HEIGHT"]) > 5:
                 self.entry_exit_in_42(config)
-        except (EntryError, ExitError, EntryExitError, SizeError,
-                ValueError) as e:
+        except (EntryError, ExitError, EntryExitError, SizeError) as e:
             print(e)
+            raise MazeError
+        except ValueError:
+            print(
+                "ValueError: Entry and exit coordinates must only"
+                " contain numbers"
+            )
             raise MazeError
 
     def entry_exit_in_42(self, config: dict[str, str]) -> None:
