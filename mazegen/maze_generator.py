@@ -2,6 +2,98 @@ from random import randint, shuffle
 from queue import Queue
 
 
+class EntryError(Exception):
+    """
+    Exception raised when entry coordinates are outside maze boundaries.
+    """
+
+    def __init__(self, message: str = "Entry coordinates must be within maze"
+                 " boundaries.") -> None:
+        """
+        Initialize the exception with a custom error message.
+
+        Args:
+            message (str): Error message to display.
+
+        Returns:
+            None
+        """
+        super().__init__(message)
+
+
+class ExitError(Exception):
+    """
+    Exception raised when exit coordinates are outside maze boundaries.
+    """
+
+    def __init__(self, message: str = "Exit coordinates must be within maze"
+                 " boundaries.") -> None:
+        """
+        Initialize the exception with a custom error message.
+
+        Args:
+            message (str): Error message to display.
+
+        Returns:
+            None
+        """
+        super().__init__(message)
+
+
+class SizeError(Exception):
+    """
+    Exception raised when the maze dimensions are too small to render '42'.
+    """
+
+    def __init__(self, message: str = "To show the 42, the maze must be "
+                 "larger than 7x5") -> None:
+        """
+        Initialize the exception with a custom error message.
+
+        Args:
+            message (str): Error message to display.
+        """
+        super().__init__(message)
+
+
+class EntryExitError(Exception):
+    """
+    Exception raised when entry and exit coordinates are identical.
+    """
+
+    def __init__(self, message: str = "Entry Exit Error: Entry and exit "
+                 "points need to be in different positions.") -> None:
+        """
+        Initialize the exception with a custom error message.
+
+        Args:
+            message (str): Error message to display.
+
+        Returns:
+            None
+        """
+        super().__init__(message)
+
+
+class MazeError(Exception):
+    """
+    Custom exception for invalid maze configurations.
+    """
+
+    def __init__(self, message: str = "Invalid maze configuration") -> None:
+        """
+        Initialize the exception with a custom error message.
+
+        Args:
+            message (str): Explanation of the error.
+                Defaults to "Invalid maze configuration".
+
+        Returns:
+            None
+        """
+        super().__init__(message)
+
+
 class MazeGenerator:
     """
     A manager class responsible for generating and solving customized mazes.
@@ -10,6 +102,84 @@ class MazeGenerator:
     embedding an easter-egg shape), loop-injection for imperfect mazes, and
     breadth-first search pathfinding.
     """
+
+    def __init__(self, config: dict[str, str]) -> None:
+        """
+        Initialize and validate the maze configuration.
+
+        Args:
+            config (dict[str, str]): A dictionary containing maze settings
+                                     with keys:
+                - "ENTRY": Comma-separated x,y coordinates for the entry point.
+                - "EXIT": Comma-separated x,y coordinates for the exit point.
+                - "WIDTH": The width of the maze.
+                - "HEIGHT": The height of the maze.
+
+        Raises:
+            EntryExitError: If entry and exit coordinates are identical.
+            EntryError: If the entry point is outside the maze boundaries.
+            ExitError: If the exit point is outside the maze boundaries.
+            SizeError: If the maze dimensions are too small (width <= 7 or
+                       height <= 5).
+            MazeError: If any of the above errors are caught during validation.
+
+        Returns:
+            None
+        """
+        try:
+            ENTRY = [int(x) for x in config["ENTRY"].split(",")]
+            EXIT = [int(x) for x in config["EXIT"].split(",")]
+            if ENTRY == EXIT:
+                raise EntryExitError
+            if (ENTRY[0] > int(config["WIDTH"]) or ENTRY[0] < 0 or
+                    ENTRY[1] > int(config["HEIGHT"]) or ENTRY[1] < 0):
+                raise EntryError
+
+            if EXIT[0] > int(config["WIDTH"]) or EXIT[0] < 0 or EXIT[1] > int(
+                    config["HEIGHT"]) or EXIT[1] < 0:
+                raise ExitError
+
+            if int(config["WIDTH"]) <= 7 or int(config["HEIGHT"]) <= 5:
+                raise SizeError
+
+            if int(config["WIDTH"]) > 7 and int(config["HEIGHT"]) > 5:
+                self.entry_exit_in_42(config)
+        except (EntryError, ExitError, EntryExitError, SizeError,
+                ValueError) as e:
+            print(e)
+            raise MazeError
+
+    def entry_exit_in_42(self, config: dict[str, str]) -> None:
+        """
+        Verify if the entry or exit points fall inside the '42' text drawing
+        layout.
+
+        Args:
+            config (dict[str, str]): Maze configuration settings.
+
+        Raises:
+            EntryExitError: If the entry or exit coordinates overlap with the
+            predefined '42' coordinate masks.
+        """
+        vis = [[False for i in range(int(config["WIDTH"]))]
+               for j in range(int(config["HEIGHT"]))]
+        y = round((len(vis) - 5) / 2)
+        x = round((len(vis[0]) - 7) / 2)
+
+        entry_x, entry_y = tuple(int(x) for x in config["ENTRY"].split(","))
+        exit_x, exit_y = tuple(int(x) for x in config["EXIT"].split(","))
+
+        targets = [
+            (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 3), (2, 4),
+            (4, 0), (5, 0), (6, 0), (6, 1), (6, 2), (5, 2), (4, 2),
+            (4, 3), (4, 4), (5, 4), (6, 4)
+        ]
+        if (entry_x - x, entry_y - y) in targets:
+            raise EntryExitError("Entry Exit Error: Entry cannot be "
+                                 "inside the 42 drawing")
+        if (exit_x - x, exit_y - y) in targets:
+            raise EntryExitError("Entry Exit Error: Exits cannot be "
+                                 "inside the 42 drawing")
 
     def generate_maze(self, config: dict[str, str]) -> tuple:
         """

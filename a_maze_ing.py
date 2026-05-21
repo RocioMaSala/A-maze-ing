@@ -24,25 +24,6 @@ class UsageError(Exception):
         super().__init__(message)
 
 
-class EntryExitError(Exception):
-    """
-    Exception raised when entry and exit coordinates are identical.
-    """
-
-    def __init__(self, message: str = "Entry Exit Error: Entry and exit "
-                 "points need to be in different positions.") -> None:
-        """
-        Initialize the exception with a custom error message.
-
-        Args:
-            message (str): Error message to display.
-
-        Returns:
-            None
-        """
-        super().__init__(message)
-
-
 class ConfigSyntaxError(Exception):
     """
     Exception raised when the configuration file syntax is invalid.
@@ -57,60 +38,6 @@ class ConfigSyntaxError(Exception):
 
         Returns:
             None
-        """
-        super().__init__(message)
-
-
-class EntryError(Exception):
-    """
-    Exception raised when entry coordinates are outside maze boundaries.
-    """
-
-    def __init__(self, message: str = "Entry coordinates must be within maze"
-                 " boundaries.") -> None:
-        """
-        Initialize the exception with a custom error message.
-
-        Args:
-            message (str): Error message to display.
-
-        Returns:
-            None
-        """
-        super().__init__(message)
-
-
-class ExitError(Exception):
-    """
-    Exception raised when exit coordinates are outside maze boundaries.
-    """
-
-    def __init__(self, message: str = "Exit coordinates must be within maze"
-                 " boundaries.") -> None:
-        """
-        Initialize the exception with a custom error message.
-
-        Args:
-            message (str): Error message to display.
-
-        Returns:
-            None
-        """
-        super().__init__(message)
-
-
-class SizeError(Exception):
-    """
-    Exception raised when the maze dimensions are too small to render '42'.
-    """
-
-    def __init__(self, message: str = "To show the 42, the maze must be "
-                 "larger than 7x5") -> None:
-        """
-        Initialize the exception with a custom error message.
-
-        Args:
-            message (str): Error message to display.
         """
         super().__init__(message)
 
@@ -135,6 +62,25 @@ class ConfigValueError(Exception):
 
         Args:
             message (str): Error message to display.
+        """
+        super().__init__(message)
+
+
+class MazeError(Exception):
+    """
+    Custom exception for invalid maze configurations.
+    """
+
+    def __init__(self, message: str = "Invalid maze configuration") -> None:
+        """
+        Initialize the exception with a custom error message.
+
+        Args:
+            message (str): Explanation of the error.
+                Defaults to "Invalid maze configuration".
+
+        Returns:
+            None
         """
         super().__init__(message)
 
@@ -186,43 +132,16 @@ def random_generator(
         containing a maze and its corresponding route.
     """
 
-    maze_gen = MazeGenerator()
+    try:
+        maze_gen = MazeGenerator(config)
+    except Exception:
+        raise MazeError
     seed_val = 1
     while True:
         seed(seed_val)
         maze, route = maze_gen.generate_maze(config)
         seed_val += 1
         yield maze, route
-
-
-def is_in_42(config: dict[str, str]) -> None:
-    """
-    Verify if the entry or exit points fall inside the '42' text drawing
-    layout.
-
-    Args:
-        config (dict[str, str]): Maze configuration settings.
-
-    Raises:
-        EntryExitError: If the entry or exit coordinates overlap with the
-        predefined '42' coordinate masks.
-    """
-    vis = [[False for i in range(int(config["WIDTH"]))]
-           for j in range(int(config["HEIGHT"]))]
-    y = round((len(vis) - 5) / 2)
-    x = round((len(vis[0]) - 7) / 2)
-
-    entry_x, entry_y = tuple(int(x) for x in config["ENTRY"].split(","))
-    exit_x, exit_y = tuple(int(x) for x in config["EXIT"].split(","))
-
-    targets = [
-        (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 3), (2, 4),
-        (4, 0), (5, 0), (6, 0), (6, 1), (6, 2), (5, 2), (4, 2),
-        (4, 3), (4, 4), (5, 4), (6, 4)
-    ]
-    if (entry_x - x, entry_y - y) in targets:
-        raise EntryExitError("Entry Exit Error: Entry and exits cannot be "
-                             "inside the 42 drawing")
 
 
 def menu(
@@ -358,7 +277,7 @@ def main() -> None:
         with open(sys.argv[1]) as file:
             config = {key.strip(): value.strip() for key, value in
                       (parse_config_line(line) for line in file if
-                       line.strip())}
+                       line.strip() and not line.strip().startswith("#"))}
         REQUIRED_KEYS = {
             "WIDTH",
             "HEIGHT",
@@ -380,41 +299,22 @@ def main() -> None:
                 f"Config Error: Invalid value for 'PERFECT'. "
                 f"Expected 'True' or 'False', got '{config['PERFECT']}'."
             )
-        if config["ENTRY"] == config["EXIT"]:
-            raise EntryExitError
-        ENTRY = [int(x) for x in config["ENTRY"].split(",")]
-        EXIT = [int(x) for x in config["EXIT"].split(",")]
-        if ENTRY[0] > int(config["WIDTH"]) or ENTRY[0] < 0 or ENTRY[1] > int(
-                config["HEIGHT"]) or ENTRY[1] < 0:
-            raise EntryError
-        if EXIT[0] > int(config["WIDTH"]) or EXIT[0] < 0 or EXIT[1] > int(
-                config["HEIGHT"]) or EXIT[1] < 0:
-            raise ExitError
-        if int(config["WIDTH"]) > 7 and int(config["HEIGHT"]) > 5:
-            is_in_42(config)
-        if int(config["WIDTH"]) <= 7 or int(config["HEIGHT"]) <= 5:
-            raise SizeError
         generate = random_generator(config)
         menu(generate, config)
-
     except UsageError as e:
         print(e)
     except FileNotFoundError:
         print("config.txt file not present")
-    except EntryExitError as e:
-        print(e)
     except MissingConfigKeyError as e:
         print(e)
     except ConfigValueError as e:
         print(e)
-    except EntryError as e:
-        print(e)
-    except ExitError as e:
-        print(e)
-    except SizeError as e:
+    except ConfigSyntaxError as e:
         print(e)
     except ValueError as e:
         print(e)
+    except MazeError:
+        return
 
 
 if __name__ == "__main__":
