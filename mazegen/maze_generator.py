@@ -40,22 +40,6 @@ class ExitError(Exception):
         super().__init__(message)
 
 
-class SizeError(Exception):
-    """
-    Exception raised when the maze dimensions are too small to render '42'.
-    """
-
-    def __init__(self, message: str = "To show the 42, the maze must be "
-                 "larger than 7x5") -> None:
-        """
-        Initialize the exception with a custom error message.
-
-        Args:
-            message (str): Error message to display.
-        """
-        super().__init__(message)
-
-
 class EntryExitError(Exception):
     """
     Exception raised when entry and exit coordinates are identical.
@@ -127,31 +111,31 @@ class MazeGenerator:
             None
         """
         try:
-            ENTRY = [int(x) for x in config["ENTRY"].split(",")]
-            EXIT = [int(x) for x in config["EXIT"].split(",")]
+            if len(config["ENTRY"].split(",")) != 2:
+                raise EntryError("Entry coordintes syntax must be a,b")
+            if len(config["EXIT"].split(",")) != 2:
+                raise ExitError("Exit coordintes syntax must be a,b")
+            ENTRY = [int(x.strip()) for x in config["ENTRY"].split(",")]
+            EXIT = [int(x.strip()) for x in config["EXIT"].split(",")]
             if ENTRY == EXIT:
                 raise EntryExitError
-            if (ENTRY[0] > int(config["WIDTH"]) or ENTRY[0] < 0 or
-                    ENTRY[1] > int(config["HEIGHT"]) or ENTRY[1] < 0):
+            if (ENTRY[0] >= int(config["WIDTH"]) or ENTRY[0] < 0 or
+                    ENTRY[1] >= int(config["HEIGHT"]) or ENTRY[1] < 0):
                 raise EntryError
 
-            if EXIT[0] > int(config["WIDTH"]) or EXIT[0] < 0 or EXIT[1] > int(
-                    config["HEIGHT"]) or EXIT[1] < 0:
+            if (EXIT[0] >= int(config["WIDTH"]) or EXIT[0] < 0 or
+                    EXIT[1] >= int(config["HEIGHT"]) or EXIT[1] < 0):
                 raise ExitError
-
-            if int(config["WIDTH"]) <= 7 or int(config["HEIGHT"]) <= 5:
-                raise SizeError
 
             if int(config["WIDTH"]) > 7 and int(config["HEIGHT"]) > 5:
                 self.entry_exit_in_42(config)
-        except (EntryError, ExitError, EntryExitError, SizeError) as e:
+        except (EntryError, ExitError, EntryExitError) as e:
             print(e)
             raise MazeError
         except ValueError:
             print(
-                "ValueError: Entry and exit coordinates must only"
-                " contain numbers"
-            )
+                "ValueError: Non numeric characters included "
+                "in numeric positions")
             raise MazeError
 
     def entry_exit_in_42(self, config: dict[str, str]) -> None:

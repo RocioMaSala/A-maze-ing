@@ -132,6 +132,8 @@ def random_generator(
         containing a maze and its corresponding route.
     """
 
+    if int(config["WIDTH"]) <= 7 or int(config["HEIGHT"]) <= 5:
+        print("To show the 42, the maze mmust be larger than 7x5")
     try:
         maze_gen = MazeGenerator(config)
     except Exception:
